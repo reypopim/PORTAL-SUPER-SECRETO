@@ -8,7 +8,7 @@
   <!-- Tipografías elegantes de Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:ital,wght@0,200;0,300;0,400;1,200;1,300&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;1,200;1,300&display=swap" rel="stylesheet" />
 
   <!-- Three.js vía CDN confiable -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -73,7 +73,6 @@
       pointer-events: none;
     }
 
-    /* Canvas para lluvia de corazones dorados y estrellas de fondo */
     #portal-canvas {
       position: absolute;
       top: 0;
@@ -171,7 +170,6 @@
       transform: translateY(-2px);
     }
 
-    /* Animación de vibración para error */
     .pin-shake {
       animation: shakeInputs 0.45s ease-in-out;
     }
@@ -182,7 +180,6 @@
       40%, 80% { transform: translateX(8px); }
     }
 
-    /* Animación de éxito */
     .pin-success {
       border-color: var(--gold-bright) !important;
       box-shadow: 0 0 25px var(--gold-bright) !important;
@@ -226,7 +223,6 @@
       opacity: 1;
     }
 
-    /* Encabezado e instrucciones discretas */
     .galaxy-hud {
       position: absolute;
       top: 0;
@@ -240,6 +236,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 2.2rem 1.5rem 1.8rem;
+      transition: opacity 0.6s ease;
     }
 
     .galaxy-title {
@@ -275,105 +272,568 @@
     }
 
     /* ==========================================================================
-       4. MODAL DE ESTRELLA ESPECIAL
+       4. SISTEMA DE MINI-PÁGINAS (MUNDOS) Y OVERLAY
        ========================================================================== */
-    #star-modal-backdrop {
-      position: absolute;
+    .universe-overlay {
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 100;
-      background: rgba(1, 3, 10, 0.65);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      z-index: 50;
+      background: radial-gradient(circle at 50% 50%, rgba(3, 7, 18, 0.62) 0%, rgba(2, 4, 10, 0.82) 100%);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: flex;
       justify-content: center;
       align-items: center;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.25, 1);
     }
 
-    #star-modal-backdrop.modal-open {
+    .universe-overlay.world-active {
       opacity: 1;
       pointer-events: auto;
     }
 
-    .star-modal-card {
+    .mini-page {
       position: relative;
-      background: rgba(4, 9, 24, 0.85);
-      border: 1px solid rgba(230, 198, 112, 0.35);
-      border-radius: 20px;
-      padding: 2.8rem 2.2rem;
-      width: 90%;
-      max-width: 480px;
-      text-align: center;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(230, 198, 112, 0.12);
-      transform: scale(0.92) translateY(15px);
-      transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+      width: 86vw;
+      max-width: 940px;
+      height: 86vh;
+      background: rgba(4, 9, 24, 0.78);
+      border: 1px solid rgba(230, 198, 112, 0.32);
+      border-radius: 24px;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.85), 0 0 45px rgba(230, 198, 112, 0.12);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: scale(0.94) translateY(20px);
+      opacity: 0;
+      transition: transform 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.15), opacity 0.7s ease;
     }
 
-    #star-modal-backdrop.modal-open .star-modal-card {
+    .universe-overlay.world-active .mini-page {
       transform: scale(1) translateY(0);
+      opacity: 1;
     }
 
-    .modal-close-btn {
-      position: absolute;
-      top: 1.2rem;
-      right: 1.4rem;
+    /* Barra Superior Sticky para volver */
+    .mini-page-header {
+      position: sticky;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 10;
+      background: rgba(4, 8, 20, 0.82);
+      border-bottom: 1px solid rgba(230, 198, 112, 0.16);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 0.95rem 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .back-btn {
       background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.6rem;
-      cursor: pointer;
-      line-height: 1;
-      transition: color 0.2s ease, transform 0.2s ease;
-    }
-
-    .modal-close-btn:hover {
+      border: 1px solid rgba(230, 198, 112, 0.35);
       color: var(--gold-bright);
-      transform: rotate(90deg);
-    }
-
-    .modal-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      filter: drop-shadow(0 0 15px rgba(255, 217, 120, 0.4));
-    }
-
-    .modal-title {
-      font-family: var(--font-serif);
-      font-size: 1.7rem;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      font-weight: 400;
       letter-spacing: 1.5px;
-      color: #ffffff;
-      margin-bottom: 1.2rem;
-      text-shadow: 0 0 15px rgba(255, 217, 120, 0.3);
+      padding: 0.5rem 1.1rem;
+      border-radius: 30px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
     }
 
-    .modal-description {
-      font-size: 0.98rem;
-      line-height: 1.65;
-      color: rgba(245, 246, 250, 0.82);
+    .back-btn:hover {
+      background: rgba(230, 198, 112, 0.15);
+      border-color: var(--gold-bright);
+      box-shadow: 0 0 15px rgba(255, 217, 120, 0.35);
+      transform: translateX(-3px);
+    }
+
+    .header-subtle-hint {
+      font-size: 0.76rem;
+      letter-spacing: 2px;
+      color: rgba(245, 246, 250, 0.4);
+      text-transform: uppercase;
+      font-family: var(--font-serif);
+    }
+
+    /* Contenedor Escroleable Aislado */
+    .mini-page-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 3rem 2.5rem 4rem;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    /* Scrollbar personalizada y elegante */
+    .mini-page-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .mini-page-content::-webkit-scrollbar-track {
+      background: rgba(2, 5, 14, 0.5);
+    }
+    .mini-page-content::-webkit-scrollbar-thumb {
+      background: rgba(230, 198, 112, 0.28);
+      border-radius: 4px;
+    }
+    .mini-page-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 217, 120, 0.55);
+    }
+    .mini-page-content {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(230, 198, 112, 0.28) rgba(2, 5, 14, 0.5);
+    }
+
+    /* Encabezado Principal del Mundo */
+    .world-intro-header {
+      text-align: center;
+      margin-bottom: 3.2rem;
+    }
+
+    .world-intro-icon {
+      font-size: 3.2rem;
+      margin-bottom: 0.8rem;
+      filter: drop-shadow(0 0 16px rgba(255, 217, 120, 0.45));
+      display: inline-block;
+      animation: floatSubtle 4s ease-in-out infinite;
+    }
+
+    @keyframes floatSubtle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .world-intro-title {
+      font-family: var(--font-serif);
+      font-size: 2.1rem;
+      letter-spacing: 3px;
+      color: #fff;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffffff 40%, var(--gold-bright) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.9rem;
+    }
+
+    .world-intro-quote {
+      font-style: italic;
+      font-size: 1.05rem;
       font-weight: 300;
+      color: rgba(245, 246, 250, 0.8);
+      max-width: 620px;
+      margin: 0 auto;
+      line-height: 1.7;
+      letter-spacing: 0.5px;
+    }
+
+    .world-divider {
+      width: 70px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+      margin: 2.2rem auto 0;
+    }
+
+    /* Componentes visuales de mundos (Línea de tiempo, tarjetas, galerías) */
+    .timeline {
+      position: relative;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 1.5rem 0;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 1px;
+      background: linear-gradient(180deg, transparent, rgba(230, 198, 112, 0.45) 15%, rgba(230, 198, 112, 0.45) 85%, transparent);
+      transform: translateX(-50%);
+    }
+
+    .timeline-node {
+      position: relative;
+      margin: 2.5rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .timeline-dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--gold-bright);
+      box-shadow: 0 0 14px var(--gold-glow);
+      z-index: 2;
+      margin-bottom: 1rem;
+    }
+    .timeline-box {
+      background: rgba(8, 17, 40, 0.65);
+      border: 1px solid rgba(230, 198, 112, 0.22);
+      border-radius: 16px;
+      padding: 1.6rem 2rem;
+      width: 85%;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+    .timeline-box:hover {
+      border-color: rgba(230, 198, 112, 0.5);
+      transform: translateY(-2px);
+    }
+    .timeline-date {
+      font-family: var(--font-serif);
+      font-size: 0.85rem;
+      color: var(--gold-bright);
+      letter-spacing: 2px;
+      margin-bottom: 0.4rem;
+    }
+    .timeline-title {
+      font-family: var(--font-serif);
+      font-size: 1.2rem;
+      color: #fff;
+      margin-bottom: 0.6rem;
+    }
+    .timeline-desc {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: rgba(245, 246, 250, 0.78);
+      font-weight: 300;
+    }
+
+    /* Galería de Recuerdos */
+    .memories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.8rem;
+      margin-top: 1rem;
+    }
+    .memory-card {
+      background: rgba(7, 16, 38, 0.65);
+      border: 1px solid rgba(230, 198, 112, 0.2);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+    }
+    .memory-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(230, 198, 112, 0.55);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(230, 198, 112, 0.15);
+    }
+    .memory-photo-placeholder {
+      width: 100%;
+      height: 190px;
+      background: radial-gradient(circle at 50% 50%, rgba(16, 30, 68, 0.7), rgba(4, 9, 22, 0.95));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid rgba(230, 198, 112, 0.15);
+      color: rgba(230, 198, 112, 0.7);
+      font-size: 0.82rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      gap: 0.6rem;
+    }
+    .memory-info {
+      padding: 1.2rem;
+      text-align: left;
+    }
+    .memory-date {
+      font-size: 0.75rem;
+      color: var(--gold-bright);
+      letter-spacing: 1px;
+      font-family: var(--font-serif);
+      margin-bottom: 0.3rem;
+    }
+    .memory-name {
+      font-size: 1.05rem;
+      color: #fff;
+      font-family: var(--font-serif);
+      margin-bottom: 0.5rem;
+    }
+    .memory-caption {
+      font-size: 0.85rem;
+      color: rgba(245, 246, 250, 0.7);
+      line-height: 1.5;
+      font-weight: 300;
+    }
+
+    /* Cartas Estilo Biblioteca */
+    .letters-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .letter-envelope {
+      background: rgba(7, 16, 38, 0.65);
+      border: 1px solid rgba(230, 198, 112, 0.22);
+      border-radius: 16px;
+      padding: 1.6rem 2rem;
+      cursor: pointer;
+      transition: all 0.35s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .letter-envelope:hover {
+      border-color: var(--gold-bright);
+      background: rgba(10, 22, 52, 0.8);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 18px rgba(230, 198, 112, 0.15);
+    }
+    .letter-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+    }
+    .letter-num {
+      font-family: var(--font-serif);
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      color: var(--gold-bright);
+      text-transform: uppercase;
+    }
+    .letter-badge {
+      font-size: 0.8rem;
+      color: var(--gold-bright);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .letter-headline {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .letter-preview {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: rgba(245, 246, 250, 0.7);
+      font-weight: 300;
+      font-style: italic;
+    }
+    .letter-expanded-content {
+      margin-top: 1.2rem;
+      padding-top: 1.2rem;
+      border-top: 1px dashed rgba(230, 198, 112, 0.25);
+      display: none;
+      font-style: normal;
+      color: rgba(245, 246, 250, 0.9);
+      line-height: 1.8;
+      font-size: 0.95rem;
+    }
+    .letter-envelope.open .letter-expanded-content {
+      display: block;
+      animation: fadeInText 0.4s ease;
+    }
+
+    @keyframes fadeInText {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Reproductor de Nuestra Canción */
+    .music-box {
+      max-width: 620px;
+      margin: 0 auto;
+      background: rgba(8, 18, 44, 0.65);
+      border: 1px solid rgba(230, 198, 112, 0.28);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+    .music-cover {
+      width: 190px;
+      height: 190px;
+      margin: 0 auto 1.8rem;
+      border-radius: 18px;
+      background: radial-gradient(circle at 50% 50%, rgba(20, 38, 85, 0.9), rgba(5, 10, 26, 0.95));
+      border: 1px solid rgba(230, 198, 112, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: var(--gold-bright);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+    }
+    .track-title {
+      font-family: var(--font-serif);
+      font-size: 1.45rem;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+    .track-artist {
+      font-size: 0.95rem;
+      color: rgba(245, 246, 250, 0.6);
+      font-weight: 300;
+      letter-spacing: 1px;
       margin-bottom: 2rem;
     }
+    .player-progress-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      margin-bottom: 0.8rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .player-progress-fill {
+      width: 38%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-primary), var(--gold-bright));
+      border-radius: 4px;
+      box-shadow: 0 0 10px var(--gold-glow);
+    }
+    .player-times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: rgba(245, 246, 250, 0.5);
+      margin-bottom: 1.6rem;
+    }
+    .player-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.8rem;
+    }
+    .player-btn {
+      background: transparent;
+      border: 1px solid rgba(230, 198, 112, 0.3);
+      color: var(--gold-bright);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .player-btn.play-main {
+      width: 58px;
+      height: 58px;
+      font-size: 1.4rem;
+      background: rgba(230, 198, 112, 0.15);
+      border-color: var(--gold-bright);
+      box-shadow: 0 0 18px rgba(255, 217, 120, 0.25);
+    }
+    .player-btn:hover {
+      transform: scale(1.08);
+      background: rgba(230, 198, 112, 0.22);
+    }
 
-    .modal-future-slot {
-      padding: 1.2rem;
-      background: rgba(8, 17, 42, 0.5);
-      border: 1px dashed rgba(230, 198, 112, 0.25);
-      border-radius: 12px;
-      font-size: 0.82rem;
-      color: rgba(230, 198, 112, 0.8);
-      letter-spacing: 1px;
+    /* Tarjetas de Nuestro Futuro */
+    .future-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.6rem;
+    }
+    .future-card {
+      background: rgba(8, 17, 40, 0.65);
+      border: 1px solid rgba(230, 198, 112, 0.22);
+      border-radius: 18px;
+      padding: 1.8rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      transition: all 0.3s ease;
+    }
+    .future-card:hover {
+      border-color: var(--gold-bright);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(230, 198, 112, 0.12);
+    }
+    .future-card-icon {
+      font-size: 1.8rem;
+      color: var(--gold-bright);
+    }
+    .future-card-title {
+      font-family: var(--font-serif);
+      font-size: 1.2rem;
+      color: #fff;
+    }
+    .future-card-text {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: rgba(245, 246, 250, 0.75);
+      font-weight: 300;
+    }
+
+    /* Nuestro Secreto */
+    .secret-box {
+      max-width: 580px;
+      margin: 2rem auto;
+      text-align: center;
+      padding: 3rem 2rem;
+      background: rgba(5, 10, 26, 0.8);
+      border: 1px dashed rgba(230, 198, 112, 0.35);
+      border-radius: 20px;
+      position: relative;
+    }
+    .secret-lock-icon {
+      font-size: 2.8rem;
+      margin-bottom: 1.2rem;
+      filter: drop-shadow(0 0 12px rgba(255, 217, 120, 0.3));
+    }
+
+    /* Dios (Centro Sagrado) */
+    .god-box {
+      max-width: 680px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    .verse-card {
+      background: rgba(8, 18, 44, 0.65);
+      border: 1px solid rgba(255, 240, 184, 0.3);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      margin-top: 1.5rem;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), 0 0 35px rgba(255, 240, 184, 0.1);
+    }
+    .verse-text {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      line-height: 1.9;
+      color: #ffffff;
+      font-style: italic;
+      margin-bottom: 1.4rem;
+    }
+    .verse-ref {
+      font-size: 0.9rem;
+      color: var(--gold-bright);
+      letter-spacing: 2px;
       text-transform: uppercase;
+      font-family: var(--font-serif);
     }
 
     /* ==========================================================================
        5. ADAPTACIONES MÓVILES (RESPONSIVE)
        ========================================================================== */
-    @media (max-width: 600px) {
+    @media (max-width: 650px) {
       .portal-container {
         padding: 2.2rem 1.4rem;
       }
@@ -393,21 +853,56 @@
         height: 58px;
         font-size: 1.6rem;
       }
-      .star-modal-card {
-        padding: 2.2rem 1.6rem;
-      }
-      .modal-icon {
-        font-size: 2.5rem;
-      }
-      .modal-title {
-        font-size: 1.4rem;
-      }
       .galaxy-title {
         font-size: 0.95rem;
         letter-spacing: 4px;
       }
       .galaxy-instructions {
         font-size: 0.72rem;
+      }
+
+      /* Mini-página en móvil */
+      .mini-page {
+        width: 95vw;
+        height: 90vh;
+        border-radius: 18px;
+      }
+      .mini-page-header {
+        padding: 0.8rem 1rem;
+      }
+      .back-btn {
+        font-size: 0.78rem;
+        padding: 0.45rem 0.9rem;
+      }
+      .mini-page-content {
+        padding: 2rem 1.2rem 3rem;
+      }
+      .world-intro-title {
+        font-size: 1.6rem;
+        letter-spacing: 2px;
+      }
+      .world-intro-quote {
+        font-size: 0.92rem;
+      }
+      .timeline::before {
+        left: 20px;
+      }
+      .timeline-node {
+        align-items: flex-start;
+        padding-left: 45px;
+        text-align: left;
+      }
+      .timeline-dot {
+        position: absolute;
+        left: 14px;
+        top: 20px;
+      }
+      .timeline-box {
+        width: 100%;
+        padding: 1.2rem 1.4rem;
+      }
+      .memories-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -446,14 +941,23 @@
     <div class="galaxy-instructions" id="galaxy-hint">Arrastra para explorar · Usa la rueda o pellizca para acercarte · Haz clic en una estrella</div>
   </div>
 
-  <!-- MODAL DE CONTENIDO DE ESTRELLAS -->
-  <div id="star-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title-elem">
-    <div class="star-modal-card">
-      <button class="modal-close-btn" id="modal-close" aria-label="Cerrar">×</button>
-      <div class="modal-icon" id="modal-icon-elem" aria-hidden="true"></div>
-      <h2 class="modal-title" id="modal-title-elem"></h2>
-      <p class="modal-description" id="modal-desc-elem"></p>
-      <div class="modal-future-slot">[ Rincón preparado para fotografías, cartas y recuerdos futuros ]</div>
+  <!-- ==========================================================================
+       SISTEMA DE MINI-PÁGINAS FLOTANTES (MUNDOS)
+       ========================================================================== -->
+  <div class="universe-overlay" id="universe-overlay" aria-hidden="true">
+    <div class="mini-page" id="mini-page-panel" role="dialog" aria-modal="true">
+      <!-- Barra Superior Fija -->
+      <div class="mini-page-header">
+        <button class="back-btn" id="world-back-btn" aria-label="Volver al universo">
+          ← Volver al universo
+        </button>
+        <div class="header-subtle-hint" id="header-hint">Universo Privado</div>
+      </div>
+
+      <!-- Contenedor con Scroll Aislado e Ilimitado -->
+      <div class="mini-page-content" id="mini-page-scroll-area">
+        <!-- Contenido inyectado dinámicamente según la estrella -->
+      </div>
     </div>
   </div>
 
@@ -468,79 +972,293 @@
     const ERROR_PHRASE = "intenta otra vez mi corderita";
 
     /* ==========================================================================
-       DATOS DE LAS 7 ESTRELLAS ESPECIALES
+       ARQUITECTURA DE MUNDOS (CONTENIDO EDITABLE DE CADA ESTRELLA)
        ========================================================================== */
-    const specialStarsData = [
-      {
+    const worlds = {
+      historia: {
         id: "historia",
         title: "Nuestra historia",
         icon: "💌",
-        description: "Aquí podemos guardar nuestra historia: cómo nos conocimos, cómo comenzó todo y cada momento que nos llevó hasta este día.",
-        position: { x: 75, y: 12, z: -60 },
-        color: 0xffe89e,
-        size: 2.8,
-        isCore: false
+        quote: "“Todo comenzó mucho antes de que supiéramos dónde terminaría nuestro camino. Cada paso nos trajo exactamente aquí.”",
+        render: function() {
+          return `
+            <div class="timeline">
+              <div class="timeline-node">
+                <div class="timeline-dot"></div>
+                <div class="timeline-box">
+                  <div class="timeline-date">11 OCT 2024</div>
+                  <h3 class="timeline-title">El Primer Cruce de Miradas</h3>
+                  <p class="timeline-desc">Ese instante en el que dos caminos separados decidieron encontrarse y comenzar a escribir una historia juntos.</p>
+                </div>
+              </div>
+
+              <div class="timeline-node">
+                <div class="timeline-dot"></div>
+                <div class="timeline-box">
+                  <div class="timeline-date">PRIMEROS MESES</div>
+                  <h3 class="timeline-title">Las Primeras Conversaciones</h3>
+                  <p class="timeline-desc">Tardes enteras descubriendo que compartíamos un universo entero de pensamientos, risas y complicidad.</p>
+                </div>
+              </div>
+
+              <div class="timeline-node">
+                <div class="timeline-dot"></div>
+                <div class="timeline-box">
+                  <div class="timeline-date">MOMENTO ESPECIAL</div>
+                  <h3 class="timeline-title">Nuestro Primer Gran Recuerdo</h3>
+                  <p class="timeline-desc">El día en que entendimos que esto no era casualidad, sino el inicio de algo eterno.</p>
+                </div>
+              </div>
+
+              <div class="timeline-node">
+                <div class="timeline-dot"></div>
+                <div class="timeline-box">
+                  <div class="timeline-date">PRESENTE Y SIEMPRE</div>
+                  <h3 class="timeline-title">Continuamos Escribiendo</h3>
+                  <p class="timeline-desc">Cada nuevo día es una nueva página que pertenece únicamente a nosotros dos.</p>
+                </div>
+              </div>
+            </div>
+          `;
+        }
       },
-      {
+
+      recuerdos: {
         id: "recuerdos",
         title: "Nuestros recuerdos",
         icon: "📸",
-        description: "Un rincón reservado para nuestras fotografías, pequeños recuerdos, fechas importantes y momentos que jamás queremos olvidar.",
-        position: { x: -85, y: -8, z: 70 },
-        color: 0xffd57a,
-        size: 2.8,
-        isCore: false
+        quote: "“Un rincón reservado para nuestras fotografías, pequeños recuerdos, fechas importantes y momentos que jamás queremos olvidar.”",
+        render: function() {
+          return `
+            <div class="memories-grid">
+              <div class="memory-card">
+                <div class="memory-photo-placeholder">
+                  <span>✦ FOTOGRAFÍA #1 ✦</span>
+                  <small style="opacity:0.6;">(Lista para tu foto)</small>
+                </div>
+                <div class="memory-info">
+                  <div class="memory-date">OCTUBRE 2024</div>
+                  <div class="memory-name">Nuestra Primera Salida</div>
+                  <div class="memory-caption">Ese día en que el tiempo pareció detenerse mientras caminábamos.</div>
+                </div>
+              </div>
+
+              <div class="memory-card">
+                <div class="memory-photo-placeholder">
+                  <span>✦ FOTOGRAFÍA #2 ✦</span>
+                  <small style="opacity:0.6;">(Lista para tu foto)</small>
+                </div>
+                <div class="memory-info">
+                  <div class="memory-date">NOVIEMBRE 2024</div>
+                  <div class="memory-name">Una Tarde Juntos</div>
+                  <div class="memory-caption">Risas espontáneas que quedaron guardadas en el corazón.</div>
+                </div>
+              </div>
+
+              <div class="memory-card">
+                <div class="memory-photo-placeholder">
+                  <span>✦ FOTOGRAFÍA #3 ✦</span>
+                  <small style="opacity:0.6;">(Lista para tu foto)</small>
+                </div>
+                <div class="memory-info">
+                  <div class="memory-date">DICIEMBRE 2024</div>
+                  <div class="memory-name">Noche Bajo las Estrellas</div>
+                  <div class="memory-caption">Promesas silenciosas mientras contemplábamos la inmensidad.</div>
+                </div>
+              </div>
+
+              <div class="memory-card">
+                <div class="memory-photo-placeholder">
+                  <span>✦ FOTOGRAFÍA #4 ✦</span>
+                  <small style="opacity:0.6;">(Lista para tu foto)</small>
+                </div>
+                <div class="memory-info">
+                  <div class="memory-date">FUTURO CERCANO</div>
+                  <div class="memory-name">El Próximo Viaje</div>
+                  <div class="memory-caption">Espacio reservado para nuestro siguiente gran destino juntos.</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
       },
-      {
+
+      cartas: {
         id: "cartas",
         title: "Cartas",
         icon: "💖",
-        description: "Este será nuestro rincón para las cartas. Palabras que podamos dejar aquí para encontrarlas nuevamente cuando miremos hacia atrás.",
-        position: { x: 95, y: 20, z: 65 },
-        color: 0xffb7c5,
-        size: 2.8,
-        isCore: false
+        quote: "“Este será nuestro rincón para las cartas. Palabras que podamos dejar aquí para encontrarlas nuevamente cuando miremos hacia atrás.”",
+        render: function() {
+          return `
+            <div class="letters-list">
+              <div class="letter-envelope" onclick="this.classList.toggle('open')">
+                <div class="letter-meta">
+                  <span class="letter-num">Carta #1</span>
+                  <span class="letter-badge">Toca para abrir ✦</span>
+                </div>
+                <h3 class="letter-headline">Para ti, en cualquier momento en que lo necesites</h3>
+                <p class="letter-preview">“Si estás leyendo esto en un día difícil, recuerda lo valiosa, única e importante que eres...”</p>
+                <div class="letter-expanded-content">
+                  <p>Quería dejarte estas líneas grabadas en nuestro rincón secreto para que nunca olvides que siempre estoy aquí para ti. Admiro tu fuerza, tu sonrisa y la paz que traes a mi vida. Eres mi refugio favorito en este mundo.</p>
+                </div>
+              </div>
+
+              <div class="letter-envelope" onclick="this.classList.toggle('open')">
+                <div class="letter-meta">
+                  <span class="letter-num">Carta #2</span>
+                  <span class="letter-badge">Toca para abrir ✦</span>
+                </div>
+                <h3 class="letter-headline">Lo que sentí el primer día</h3>
+                <p class="letter-preview">“Hay momentos que uno guarda en silencio, como un pequeño tesoro...”</p>
+                <div class="letter-expanded-content">
+                  <p>Desde el primer instante supe que había algo completamente distinto en ti. Una luz cálida, sincera y auténtica. Doy gracias por cada minuto que hemos construido juntos desde entonces.</p>
+                </div>
+              </div>
+
+              <div class="letter-envelope" onclick="this.classList.toggle('open')">
+                <div class="letter-meta">
+                  <span class="letter-num">Carta #3</span>
+                  <span class="letter-badge">Toca para abrir ✦</span>
+                </div>
+                <h3 class="letter-headline">Una promesa para nuestro mañana</h3>
+                <p class="letter-preview">“No prometo que todos los días serán fáciles, pero sí prometo...”</p>
+                <div class="letter-expanded-content">
+                  <p>Prometo cuidarte, escucharte, respetarte y recordarte siempre lo amada que eres. Nuestro camino apenas está comenzando.</p>
+                </div>
+              </div>
+            </div>
+          `;
+        }
       },
-      {
-        id: "cancion",
+
+      musica: {
+        id: "musica",
         title: "Nuestra canción",
         icon: "🎵",
-        description: "Aquí podremos colocar nuestra canción, una lista de canciones o un pequeño reproductor personalizado.",
-        position: { x: -90, y: 25, z: -80 },
-        color: 0xa9c6ff,
-        size: 2.8,
-        isCore: false
+        quote: "“Aquí podremos colocar nuestra canción, una lista de canciones o un pequeño reproductor personalizado.”",
+        render: function() {
+          return `
+            <div class="music-box">
+              <div class="music-cover">
+                <span>𝄞</span>
+              </div>
+              <h3 class="track-title">Nuestra Melodía</h3>
+              <p class="track-artist">La banda sonora de nuestra historia</p>
+
+              <div class="player-progress-bar">
+                <div class="player-progress-fill"></div>
+              </div>
+              <div class="player-times">
+                <span>01:18</span>
+                <span>03:45</span>
+              </div>
+
+              <div class="player-controls">
+                <button class="player-btn" aria-label="Anterior">⏮</button>
+                <button class="player-btn play-main" aria-label="Reproducir">▶</button>
+                <button class="player-btn" aria-label="Siguiente">⏭</button>
+              </div>
+
+              <div style="margin-top:2rem; font-style:italic; font-size:0.9rem; color:rgba(245,246,250,0.7); line-height:1.7;">
+                [ Rincón preparado para enlazar un archivo de audio o tu playlist favorita ]
+              </div>
+            </div>
+          `;
+        }
       },
-      {
+
+      futuro: {
         id: "futuro",
         title: "Nuestro futuro",
         icon: "🌙",
-        description: "Una estrella para todos esos sueños que todavía no hemos cumplido: viajes, proyectos, una casa, una familia y una vida juntos.",
-        position: { x: 30, y: -22, z: 120 },
-        color: 0xffeaa7,
-        size: 2.8,
-        isCore: false
+        quote: "“Una estrella para todos esos sueños que todavía no hemos cumplido: viajes, proyectos, una casa, una familia y una vida juntos.”",
+        render: function() {
+          return `
+            <div class="future-grid">
+              <div class="future-card">
+                <div class="future-card-icon">✈</div>
+                <h4 class="future-card-title">Viajes Soñados</h4>
+                <p class="future-card-text">Ciudades por descubrir, playas de arena blanca y noches caminando bajo cielos que aún no conocemos.</p>
+              </div>
+
+              <div class="future-card">
+                <div class="future-card-icon">🏡</div>
+                <h4 class="future-card-title">Nuestro Hogar</h4>
+                <p class="future-card-text">Un espacio cálido, lleno de luz, libros, plantas y la tranquilidad de sabernos en casa.</p>
+              </div>
+
+              <div class="future-card">
+                <div class="future-card-icon">🌱</div>
+                <h4 class="future-card-title">Proyectos Compartidos</h4>
+                <p class="future-card-text">Metas que impulsamos juntos, apoyándonos en cada sueño individual y en común.</p>
+              </div>
+
+              <div class="future-card">
+                <div class="future-card-icon">✦</div>
+                <h4 class="future-card-title">Toda una Vida</h4>
+                <p class="future-card-text">Crecer de la mano, superar cualquier obstáculo y construir un amor maduro, firme y generoso.</p>
+              </div>
+            </div>
+          `;
+        }
       },
-      {
+
+      secreto: {
         id: "secreto",
         title: "Nuestro secreto",
         icon: "🔐",
-        description: "Este espacio queda reservado para algo que solamente nosotros dos sabemos.",
-        position: { x: -120, y: -18, z: -35 },
-        color: 0xdfb4ff,
-        size: 2.8,
-        isCore: false
+        quote: "“Este espacio queda reservado para algo que solamente nosotros dos sabemos.”",
+        render: function() {
+          return `
+            <div class="secret-box">
+              <div class="secret-lock-icon">🔒</div>
+              <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:1rem; color:#fff;">Mundo Restringido</h3>
+              <p style="font-size:0.95rem; font-weight:300; line-height:1.7; color:rgba(245,246,250,0.8); margin-bottom:1.5rem;">
+                Hay cosas que todavía no están listas para ser descubiertas. Este rincón aguarda por nuestras palabras más íntimas.
+              </p>
+              <div style="font-size:0.8rem; letter-spacing:2px; color:var(--gold-bright); text-transform:uppercase;">
+                [ Preparado para una segunda contraseña en el futuro ]
+              </div>
+            </div>
+          `;
+        }
       },
-      {
+
+      dios: {
         id: "dios",
         title: "Dios",
         icon: "✝",
-        description: "El centro de todo. Una estrella dedicada a Dios, quien nos sostiene, nos guía y nos recuerda que nuestro amor debe crecer siempre bajo Su voluntad.",
-        position: { x: 0, y: 5, z: 0 }, // Cerca del centro/núcleo galáctico
-        color: 0xffffff,
-        size: 4.8,
-        isCore: true
+        quote: "“El centro de todo. Una estrella dedicada a Dios, quien nos sostiene, nos guía y nos recuerda que nuestro amor debe crecer siempre bajo Su voluntad.”",
+        render: function() {
+          return `
+            <div class="god-box">
+              <div class="verse-card">
+                <p class="verse-text">
+                  “El amor es paciente, es bondadoso. El amor no es envidioso ni jactancioso ni orgulloso. No se comporta con rudeza, no es egoísta, no se enoja fácilmente, no guarda rencor... Todo lo disculpa, todo lo cree, todo lo espera, todo lo soporta.”
+                </p>
+                <div class="verse-ref">1 Corintios 13:4-7</div>
+              </div>
+
+              <div style="margin-top:2.5rem; line-height:1.8; font-size:0.95rem; font-weight:300; color:rgba(245,246,250,0.85); max-width:580px; margin-left:auto; margin-right:auto;">
+                Que sea Él quien siempre guarde nuestras intenciones, bendiga cada uno de nuestros planes y permanezca como el fundamento sólido de nuestra unión.
+              </div>
+            </div>
+          `;
+        }
       }
+    };
+
+    /* ==========================================================================
+       DATOS ESPACIALES DE LAS ESTRELLAS (THREE.JS)
+       ========================================================================== */
+    const specialStarsData = [
+      { id: "historia", title: "Nuestra historia", icon: "💌", position: { x: 75, y: 12, z: -60 }, color: 0xffe89e, size: 2.8, isCore: false },
+      { id: "recuerdos", title: "Nuestros recuerdos", icon: "📸", position: { x: -85, y: -8, z: 70 }, color: 0xffd57a, size: 2.8, isCore: false },
+      { id: "cartas", title: "Cartas", icon: "💖", position: { x: 95, y: 20, z: 65 }, color: 0xffb7c5, size: 2.8, isCore: false },
+      { id: "cancion", title: "Nuestra canción", icon: "🎵", position: { x: -90, y: 25, z: -80 }, color: 0xa9c6ff, size: 2.8, isCore: false },
+      { id: "futuro", title: "Nuestro futuro", icon: "🌙", position: { x: 30, y: -22, z: 120 }, color: 0xffeaa7, size: 2.8, isCore: false },
+      { id: "secreto", title: "Nuestro secreto", icon: "🔐", position: { x: -120, y: -18, z: -35 }, color: 0xdfb4ff, size: 2.8, isCore: false },
+      { id: "dios", title: "Dios", icon: "✝", position: { x: 0, y: 5, z: 0 }, color: 0xffffff, size: 4.8, isCore: true }
     ];
 
     /* ==========================================================================
@@ -583,8 +1301,7 @@
         speedX: (Math.random() - 0.5) * 0.4,
         rotation: (Math.random() - 0.5) * 0.5,
         rotationSpeed: (Math.random() - 0.5) * 0.02,
-        alpha: Math.random() * 0.4 + 0.3,
-        fadeSpeed: Math.random() * 0.002 + 0.001
+        alpha: Math.random() * 0.4 + 0.3
       };
     }
 
@@ -617,7 +1334,6 @@
       if (!portalCanvas) return;
       portalCtx.clearRect(0, 0, portalCanvas.width, portalCanvas.height);
 
-      // Dibujar estrellas parpadeantes de fondo
       for (let star of backgroundStars) {
         star.phase += star.speed;
         const currentAlpha = star.alpha + Math.sin(star.phase) * 0.25;
@@ -627,7 +1343,6 @@
         portalCtx.fill();
       }
 
-      // Lluvia de corazones dorados
       if (hearts.length < 28 && Math.random() < 0.04) {
         hearts.push(createHeart());
       }
@@ -667,7 +1382,6 @@
     let isVerifying = false;
 
     pinInputs.forEach((input, index) => {
-      // Filtrar y auto-avanzar
       input.addEventListener("input", (e) => {
         const val = e.target.value.replace(/[^0-9]/g, "");
         e.target.value = val;
@@ -681,14 +1395,12 @@
         }
       });
 
-      // Gestión de Backspace
       input.addEventListener("keydown", (e) => {
         if (e.key === "Backspace" && !e.target.value && index > 0) {
           pinInputs[index - 1].focus();
         }
       });
 
-      // Manejo de pegado (Paste)
       input.addEventListener("paste", (e) => {
         e.preventDefault();
         const pastedData = (e.clipboardData || window.clipboardData).getData("text").trim();
@@ -727,7 +1439,6 @@
         input.disabled = true;
       });
 
-      // Pequeña pausa cinematográfica previa al portal (1s)
       setTimeout(() => {
         startPortalTransition();
       }, 1000);
@@ -752,26 +1463,21 @@
        TRANSICIÓN CINEMATOGRÁFICA
        ========================================================================== */
     function startPortalTransition() {
-      // 1. Desvanecer la pantalla de acceso con escala y zoom
       portalStage.classList.add("portal-vanish");
 
-      // 2. Detener la animación 2D tras la transición
       setTimeout(() => {
         if (portalAnimationId) cancelAnimationFrame(portalAnimationId);
       }, 2500);
 
-      // 3. Iniciar e iluminar la Galaxia 3D
       initGalaxyScene();
       const galaxyContainer = document.getElementById("galaxy-container");
       galaxyContainer.classList.add("galaxy-visible");
 
-      // 4. Mostrar HUD sutilmente
       const hud = document.getElementById("galaxy-hud");
       setTimeout(() => {
         hud.classList.add("hud-active");
       }, 2200);
 
-      // Desvanecer el texto de instrucciones tras 8 segundos
       setTimeout(() => {
         const hint = document.getElementById("galaxy-hint");
         if (hint) hint.classList.add("fade-away");
@@ -787,39 +1493,33 @@
     let isDragging = false;
     let previousPointerPosition = { x: 0, y: 0 };
     let sphericalCoords = { radius: 260, theta: Math.PI / 3, phi: Math.PI / 4 };
-    let targetSphericalCoords = { radius: 220, theta: 0.8, phi: 0.9 };
-    let initialZoomDone = false;
+    let targetSphericalCoords = { radius: 210, theta: 0.8, phi: 0.9 };
+    let activeWorld = null; // Control del mundo actualmente abierto
 
     function initGalaxyScene() {
       const container = document.getElementById("galaxy-container");
 
-      // Escena y Niebla profunda
       scene = new THREE.Scene();
       scene.fog = new THREE.FogExp2(0x02040a, 0.0016);
 
-      // Cámara
       camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2000);
       updateCameraPosition();
 
-      // Renderer WebGL optimizado
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setClearColor(0x02040a, 1);
       container.appendChild(renderer.domElement);
 
-      // Raycaster para interactividad con estrellas
       raycaster = new THREE.Raycaster();
       raycaster.params.Points = { threshold: 3 };
       mouse = new THREE.Vector2(-9999, -9999);
 
-      // Construcción del Universo
       buildGalaxyStructure();
       buildGalaxyCore();
       buildSpecialStars();
       setupGalaxyControls();
 
-      // Animación de entrada de cámara (Sensación de escala inmersiva)
       sphericalCoords.radius = 420;
       targetSphericalCoords.radius = 210;
 
@@ -840,19 +1540,17 @@
       const positions = new Float32Array(particleCount * 3);
       const colors = new Float32Array(particleCount * 3);
 
-      const colorInside = new THREE.Color(0xffe6a3); // Dorado suave brillante
-      const colorMid = new THREE.Color(0xd4af37);    // Dorado real
-      const colorOutside = new THREE.Color(0x3d5a9d); // Azul espacial profundo
-      const colorNebula = new THREE.Color(0x6b4c82);  // Violeta espacial tenue
+      const colorInside = new THREE.Color(0xffe6a3);
+      const colorMid = new THREE.Color(0xd4af37);
+      const colorOutside = new THREE.Color(0x3d5a9d);
+      const colorNebula = new THREE.Color(0x6b4c82);
 
       for (let i = 0; i < particleCount; i++) {
         const i3 = i * 3;
-        // Distribución exponencial hacia el centro
         const r = Math.pow(Math.random(), 2.2) * galaxyRadius;
         const armAngle = ((i % arms) / arms) * Math.PI * 2;
         const spinAngle = r * (spin / galaxyRadius) * 4.5;
 
-        // Dispersión tridimensional con mayor altura cerca del centro
         const randomX = (Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * (galaxyRadius - r)) * 0.18;
         const randomY = (Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * (galaxyRadius - r)) * 0.12;
         const randomZ = (Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * (galaxyRadius - r)) * 0.18;
@@ -861,7 +1559,6 @@
         positions[i3 + 1] = randomY;
         positions[i3 + 2] = Math.sin(armAngle + spinAngle) * r + randomZ;
 
-        // Coloración según distancia al núcleo
         const mixedColor = colorInside.clone();
         if (r < galaxyRadius * 0.35) {
           mixedColor.lerp(colorMid, r / (galaxyRadius * 0.35));
@@ -878,7 +1575,6 @@
       geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
       geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
-      // Textura circular luminosa para las partículas mediante Canvas
       const particleTexture = createCircularParticleTexture();
 
       const material = new THREE.PointsMaterial({
@@ -896,7 +1592,6 @@
       scene.add(galaxyPoints);
     }
 
-    // Textura procedural suave para partículas
     function createCircularParticleTexture() {
       const canvas = document.createElement("canvas");
       canvas.width = 64;
@@ -919,7 +1614,6 @@
        NÚCLEO GALÁCTICO CENTRAL
        ========================================================================== */
     function buildGalaxyCore() {
-      // Esfera de resplandor central (núcleo dorado)
       const coreGeo = new THREE.SphereGeometry(6.5, 32, 32);
       const coreMat = new THREE.MeshBasicMaterial({
         color: 0xfff4d1,
@@ -929,7 +1623,6 @@
       coreLightMesh = new THREE.Mesh(coreGeo, coreMat);
       scene.add(coreLightMesh);
 
-      // Halo exterior brillante
       const haloGeo = new THREE.SphereGeometry(14, 32, 32);
       const haloMat = new THREE.MeshBasicMaterial({
         color: 0xffd369,
@@ -941,7 +1634,6 @@
       const haloMesh = new THREE.Mesh(haloGeo, haloMat);
       coreLightMesh.add(haloMesh);
 
-      // Luz puntual tenue central
       const pointLight = new THREE.PointLight(0xffdf80, 2, 300);
       scene.add(pointLight);
     }
@@ -956,7 +1648,6 @@
         const starGroup = new THREE.Group();
         starGroup.position.set(data.position.x, data.position.y, data.position.z);
 
-        // Núcleo visible de la estrella
         const starMat = new THREE.SpriteMaterial({
           map: starTexture,
           color: data.color,
@@ -968,7 +1659,6 @@
         sprite.scale.set(data.size, data.size, 1);
         starGroup.add(sprite);
 
-        // Anillo orbital sutil
         const ringGeo = new THREE.RingGeometry(data.size * 0.9, data.size * 1.15, 32);
         const ringMat = new THREE.MeshBasicMaterial({
           color: data.color,
@@ -981,7 +1671,6 @@
         ringMesh.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * 0.5;
         starGroup.add(ringMesh);
 
-        // Si es la estrella de Dios (Centro), añadir un aura especial y mayor brillo
         if (data.isCore) {
           const godRingGeo = new THREE.RingGeometry(data.size * 1.5, data.size * 1.7, 40);
           const godRingMat = new THREE.MeshBasicMaterial({
@@ -996,8 +1685,7 @@
           starGroup.add(godRing);
         }
 
-        // Hitbox invisible para el Raycaster (facilita el clic táctil y con mouse)
-        const hitGeo = new THREE.SphereGeometry(data.size * 1.8, 16, 16);
+        const hitGeo = new THREE.SphereGeometry(data.size * 2, 16, 16);
         const hitMat = new THREE.MeshBasicMaterial({ visible: false });
         const hitMesh = new THREE.Mesh(hitGeo, hitMat);
         hitMesh.userData = { starData: data, groupRef: starGroup };
@@ -1009,15 +1697,15 @@
     }
 
     /* ==========================================================================
-       CONTROLES DE MOUSE, TÁCTIL Y ZOOM
+       CONTROLES DE MOUSE, TÁCTIL Y ZOOM (AISLADOS DE LA MINI-PÁGINA)
        ========================================================================== */
     let touchStartDist = 0;
 
     function setupGalaxyControls() {
       const dom = renderer.domElement;
 
-      // Mouse Drag
       dom.addEventListener("mousedown", (e) => {
+        if (activeWorld) return; // Evitar arrastrar si hay mini-página abierta
         isDragging = true;
         previousPointerPosition = { x: e.clientX, y: e.clientY };
       });
@@ -1027,7 +1715,7 @@
       });
 
       dom.addEventListener("mousemove", (e) => {
-        // Actualizar coordenadas del ratón para raycasting
+        if (activeWorld) return;
         mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
@@ -1042,17 +1730,19 @@
         }
       });
 
-      // Rueda de Mouse (Zoom con límites para proteger la vista)
       dom.addEventListener("wheel", (e) => {
+        if (activeWorld) return; // El scroll no afecta a la galaxia si hay mundo activo
         e.preventDefault();
         targetSphericalCoords.radius = Math.max(50, Math.min(380, targetSphericalCoords.radius + e.deltaY * 0.25));
       }, { passive: false });
 
-      // Click para abrir Modal
-      dom.addEventListener("click", onGalaxyClick);
+      dom.addEventListener("click", () => {
+        if (!activeWorld) checkStarIntersection(true);
+      });
 
-      // Eventos Táctiles (Móviles y Tablets)
+      // Táctil (Móvil)
       dom.addEventListener("touchstart", (e) => {
+        if (activeWorld) return;
         if (e.touches.length === 1) {
           isDragging = true;
           previousPointerPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -1068,6 +1758,7 @@
       }, { passive: true });
 
       dom.addEventListener("touchmove", (e) => {
+        if (activeWorld) return;
         if (e.touches.length === 1 && isDragging) {
           const deltaX = e.touches[0].clientX - previousPointerPosition.x;
           const deltaY = e.touches[0].clientY - previousPointerPosition.y;
@@ -1088,9 +1779,9 @@
       }, { passive: true });
 
       dom.addEventListener("touchend", (e) => {
+        if (activeWorld) return;
         isDragging = false;
         if (e.changedTouches.length === 1) {
-          // Chequear toque para abrir modal en móvil
           mouse.x = (e.changedTouches[0].clientX / window.innerWidth) * 2 - 1;
           mouse.y = -(e.changedTouches[0].clientY / window.innerHeight) * 2 + 1;
           checkStarIntersection(true);
@@ -1105,21 +1796,18 @@
       camera.lookAt(0, 0, 0);
     }
 
-    function onGalaxyClick() {
-      checkStarIntersection(true);
-    }
-
     function checkStarIntersection(triggerOpen = false) {
-      if (!raycaster || !camera) return;
+      if (!raycaster || !camera || activeWorld) return;
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(specialStarMeshes, false);
 
       if (intersects.length > 0) {
         document.body.style.cursor = "pointer";
-        const selectedStar = intersects[0].object.userData.starData;
+        const hitObject = intersects[0].object;
+        const star = hitObject.userData.starData;
 
-        if (triggerOpen && selectedStar) {
-          openStarModal(selectedStar);
+        if (triggerOpen && star) {
+          openWorld(star, hitObject);
         }
       } else {
         document.body.style.cursor = "default";
@@ -1127,7 +1815,7 @@
     }
 
     /* ==========================================================================
-       CICLO DE RENDERIZADO Y ANIMACIÓN
+       CICLO DE RENDERIZADO CONTINUO (LA GALAXIA NUNCA MUERE)
        ========================================================================== */
     let clock = new THREE.Clock();
 
@@ -1136,7 +1824,7 @@
 
       const elapsedTime = clock.getElapsedTime();
 
-      // Rotación automática sutil y continua de la galaxia
+      // Rotación suave permanente, incluso detrás de una mini-página
       if (galaxyPoints) {
         galaxyPoints.rotation.y = elapsedTime * 0.035;
       }
@@ -1153,7 +1841,7 @@
         coreLightMesh.scale.set(pulse, pulse, pulse);
       }
 
-      // Pulsación y balanceo de estrellas especiales
+      // Animación de estrellas especiales
       specialStarMeshes.forEach((hitMesh) => {
         const group = hitMesh.userData.groupRef;
         if (group) {
@@ -1169,8 +1857,10 @@
         }
       });
 
-      // Hover interactivo continuo
-      checkStarIntersection(false);
+      // Si no hay mini-página abierta, chequear hover
+      if (!activeWorld) {
+        checkStarIntersection(false);
+      }
 
       renderer.render(scene, camera);
     }
@@ -1183,39 +1873,107 @@
     }
 
     /* ==========================================================================
-       GESTIÓN DE VENTANAS / MODALES
+       SISTEMA DE CONTROL DE MINI-PÁGINAS (MUNDOS)
        ========================================================================== */
-    const modalBackdrop = document.getElementById("star-modal-backdrop");
-    const modalCloseBtn = document.getElementById("modal-close");
-    const modalIconElem = document.getElementById("modal-icon-elem");
-    const modalTitleElem = document.getElementById("modal-title-elem");
-    const modalDescElem = document.getElementById("modal-desc-elem");
+    const universeOverlay = document.getElementById("universe-overlay");
+    const miniPageScrollArea = document.getElementById("mini-page-scroll-area");
+    const worldBackBtn = document.getElementById("world-back-btn");
+    const headerHint = document.getElementById("header-hint");
+    let savedCameraRadius = null;
 
-    function openStarModal(star) {
-      modalIconElem.textContent = star.icon;
-      modalTitleElem.textContent = star.title;
-      modalDescElem.textContent = star.description;
-
-      modalBackdrop.classList.add("modal-open");
+    // Normalizar ID de estrella a clave de worlds
+    function normalizeStarKey(id) {
+      if (id === "cancion") return "musica";
+      return id;
     }
 
-    function closeStarModal() {
-      modalBackdrop.classList.remove("modal-open");
+    function openWorld(starData, hitMesh) {
+      const worldKey = normalizeStarKey(starData.id);
+      const worldInfo = worlds[worldKey];
+      if (!worldInfo) return;
+
+      activeWorld = worldKey;
+      document.body.style.cursor = "default";
+
+      // 1. Efecto cinematográfico de acercamiento hacia la estrella (0.6s)
+      savedCameraRadius = targetSphericalCoords.radius;
+      targetSphericalCoords.radius = Math.max(70, targetSphericalCoords.radius * 0.85);
+
+      // Efecto de brillo ampliado momentáneo en la estrella elegida
+      if (hitMesh && hitMesh.userData.groupRef) {
+        const sprite = hitMesh.userData.groupRef.children[0];
+        if (sprite) {
+          sprite.scale.set(starData.size * 1.8, starData.size * 1.8, 1);
+        }
+      }
+
+      // 2. Construir el contenido completo e independiente del mundo
+      headerHint.textContent = `Mundo · ${worldInfo.title}`;
+
+      const fullHTML = `
+        <div class="world-intro-header">
+          <div class="world-intro-icon">${worldInfo.icon}</div>
+          <h2 class="world-intro-title">${worldInfo.title}</h2>
+          <p class="world-intro-quote">${worldInfo.quote}</p>
+          <div class="world-divider"></div>
+        </div>
+        ${worldInfo.render()}
+      `;
+
+      miniPageScrollArea.innerHTML = fullHTML;
+      miniPageScrollArea.scrollTop = 0; // Reiniciar scroll al tope
+
+      // 3. Revelar el panel inmersivo
+      setTimeout(() => {
+        universeOverlay.classList.add("world-active");
+        universeOverlay.setAttribute("aria-hidden", "false");
+      }, 400);
     }
 
-    modalCloseBtn.addEventListener("click", closeStarModal);
+    function closeWorld() {
+      if (!activeWorld) return;
 
-    modalBackdrop.addEventListener("click", (e) => {
-      if (e.target === modalBackdrop) {
-        closeStarModal();
+      // 1. Suave animación de salida
+      universeOverlay.classList.remove("world-active");
+      universeOverlay.setAttribute("aria-hidden", "true");
+
+      // 2. Restaurar la distancia de cámara de forma natural
+      if (savedCameraRadius !== null) {
+        targetSphericalCoords.radius = savedCameraRadius;
+      }
+
+      // 3. Devolver el control a la galaxia tras terminar la transición CSS
+      setTimeout(() => {
+        activeWorld = null;
+        miniPageScrollArea.innerHTML = "";
+      }, 700);
+    }
+
+    // Eventos de Cierre
+    worldBackBtn.addEventListener("click", closeWorld);
+
+    universeOverlay.addEventListener("click", (e) => {
+      // Cerrar al hacer clic en el fondo exterior a la mini-página
+      if (e.target === universeOverlay) {
+        closeWorld();
       }
     });
 
     window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modalBackdrop.classList.contains("modal-open")) {
-        closeStarModal();
+      if (e.key === "Escape" && activeWorld) {
+        closeWorld();
       }
     });
+
+    // Aislamiento completo de scroll para dispositivos táctiles y mouse wheel
+    const miniPagePanel = document.getElementById("mini-page-panel");
+    miniPagePanel.addEventListener("wheel", (e) => {
+      e.stopPropagation();
+    }, { passive: true });
+
+    miniPagePanel.addEventListener("touchmove", (e) => {
+      e.stopPropagation();
+    }, { passive: true });
   </script>
 </body>
 </html>
