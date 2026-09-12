@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Nuestro Portal Secreto</title>
+  
+  <!-- Tipografías elegantes de Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:ital,wght@0,200;0,300;0,400;1,200;1,300&display=swap" rel="stylesheet" />
+
+  <!-- Three.js vía CDN confiable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       1. VARIABLES GLOBALES Y RESET
+       ========================================================================== */
+    :root {
+      --bg-dark: #02040a;
+      --bg-portal: #030713;
+      --gold-primary: #e6c670;
+      --gold-bright: #ffd978;
+      --gold-soft: rgba(230, 198, 112, 0.4);
+      --gold-glow: rgba(255, 217, 120, 0.65);
+      --text-white: #f5f6fa;
+      --text-muted: rgba(245, 246, 250, 0.65);
+      --font-serif: 'Cinzel', serif;
+      --font-sans: 'Montserrat', sans-serif;
+      --glass-bg: rgba(7, 14, 30, 0.6);
+      --glass-border: rgba(230, 198, 112, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      font-family: var(--font-sans);
+      color: var(--text-white);
+    }
+
+    /* ==========================================================================
+       2. ETAPA 1 — PORTAL DE ACCESO (CSS)
+       ========================================================================== */
+    #portal-stage {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      transition: opacity 2s cubic-bezier(0.4, 0, 0.2, 1), transform 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+      background: radial-gradient(circle at 50% 50%, #081126 0%, #040917 50%, #010307 100%);
+    }
+
+    #portal-stage.portal-vanish {
+      opacity: 0;
+      transform: scale(1.4);
+      pointer-events: none;
+    }
+
+    /* Canvas para lluvia de corazones dorados y estrellas de fondo */
+    #portal-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .portal-container {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 2.5rem 2rem;
+      max-width: 520px;
+      width: 90%;
+      background: rgba(3, 7, 20, 0.45);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(230, 198, 112, 0.08);
+      transition: border-color 0.6s ease, box-shadow 0.6s ease;
+    }
+
+    .portal-symbol {
+      font-size: 1.4rem;
+      color: var(--gold-bright);
+      margin-bottom: 1.2rem;
+      filter: drop-shadow(0 0 8px var(--gold-glow));
+      animation: pulseSymbol 4s ease-in-out infinite;
+    }
+
+    @keyframes pulseSymbol {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.15); filter: drop-shadow(0 0 14px var(--gold-bright)); }
+    }
+
+    .portal-title {
+      font-family: var(--font-serif);
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: #fff;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffffff 30%, var(--gold-bright) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 25px rgba(255, 217, 120, 0.25);
+      margin-bottom: 0.6rem;
+    }
+
+    .portal-subtitle {
+      font-size: 0.95rem;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 2.4rem;
+      line-height: 1.5;
+    }
+
+    /* Casillas de Contraseña */
+    .pin-container {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .pin-input {
+      width: 58px;
+      height: 68px;
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      text-align: center;
+      color: var(--gold-bright);
+      background: rgba(8, 16, 38, 0.5);
+      border: 1px solid var(--gold-soft);
+      border-radius: 12px;
+      outline: none;
+      transition: all 0.25s ease;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+      caret-color: transparent;
+    }
+
+    .pin-input:focus {
+      border-color: var(--gold-bright);
+      box-shadow: 0 0 18px var(--gold-glow), inset 0 2px 6px rgba(0, 0, 0, 0.4);
+      background: rgba(14, 26, 60, 0.7);
+      transform: translateY(-2px);
+    }
+
+    /* Animación de vibración para error */
+    .pin-shake {
+      animation: shakeInputs 0.45s ease-in-out;
+    }
+
+    @keyframes shakeInputs {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Animación de éxito */
+    .pin-success {
+      border-color: var(--gold-bright) !important;
+      box-shadow: 0 0 25px var(--gold-bright) !important;
+      background: rgba(230, 198, 112, 0.18) !important;
+      color: #ffffff !important;
+    }
+
+    .portal-error-msg {
+      min-height: 24px;
+      font-size: 0.9rem;
+      font-weight: 300;
+      font-style: italic;
+      letter-spacing: 0.8px;
+      color: var(--gold-bright);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      text-shadow: 0 0 10px rgba(255, 217, 120, 0.4);
+    }
+
+    .portal-error-msg.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ==========================================================================
+       3. ETAPA 2 — INTERFAZ Y CANVAS 3D (CSS)
+       ========================================================================== */
+    #galaxy-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    #galaxy-container.galaxy-visible {
+      opacity: 1;
+    }
+
+    /* Encabezado e instrucciones discretas */
+    .galaxy-hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2.2rem 1.5rem 1.8rem;
+    }
+
+    .galaxy-title {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      font-weight: 400;
+      letter-spacing: 6px;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      text-shadow: 0 0 15px rgba(230, 198, 112, 0.3);
+      opacity: 0;
+      transition: opacity 2s ease;
+    }
+
+    .galaxy-instructions {
+      font-size: 0.82rem;
+      font-weight: 300;
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.45);
+      text-align: center;
+      opacity: 0;
+      transition: opacity 2s ease;
+    }
+
+    .galaxy-hud.hud-active .galaxy-title,
+    .galaxy-hud.hud-active .galaxy-instructions {
+      opacity: 1;
+    }
+
+    .galaxy-instructions.fade-away {
+      opacity: 0 !important;
+      transition: opacity 2s ease;
+    }
+
+    /* ==========================================================================
+       4. MODAL DE ESTRELLA ESPECIAL
+       ========================================================================== */
+    #star-modal-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+      background: rgba(1, 3, 10, 0.65);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    #star-modal-backdrop.modal-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .star-modal-card {
+      position: relative;
+      background: rgba(4, 9, 24, 0.85);
+      border: 1px solid rgba(230, 198, 112, 0.35);
+      border-radius: 20px;
+      padding: 2.8rem 2.2rem;
+      width: 90%;
+      max-width: 480px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(230, 198, 112, 0.12);
+      transform: scale(0.92) translateY(15px);
+      transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    }
+
+    #star-modal-backdrop.modal-open .star-modal-card {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.4rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.6rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .modal-close-btn:hover {
+      color: var(--gold-bright);
+      transform: rotate(90deg);
+    }
+
+    .modal-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 0 15px rgba(255, 217, 120, 0.4));
+    }
+
+    .modal-title {
+      font-family: var(--font-serif);
+      font-size: 1.7rem;
+      letter-spacing: 1.5px;
+      color: #ffffff;
+      margin-bottom: 1.2rem;
+      text-shadow: 0 0 15px rgba(255, 217, 120, 0.3);
+    }
+
+    .modal-description {
+      font-size: 0.98rem;
+      line-height: 1.65;
+      color: rgba(245, 246, 250, 0.82);
+      font-weight: 300;
+      margin-bottom: 2rem;
+    }
+
+    .modal-future-slot {
+      padding: 1.2rem;
+      background: rgba(8, 17, 42, 0.5);
+      border: 1px dashed rgba(230, 198, 112, 0.25);
+      border-radius: 12px;
+      font-size: 0.82rem;
+      color: rgba(230, 198, 112, 0.8);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ==========================================================================
+       5. ADAPTACIONES MÓVILES (RESPONSIVE)
+       ========================================================================== */
+    @media (max-width: 600px) {
+      .portal-container {
+        padding: 2.2rem 1.4rem;
+      }
+      .portal-title {
+        font-size: 1.65rem;
+        letter-spacing: 1.5px;
+      }
+      .portal-subtitle {
+        font-size: 0.88rem;
+        margin-bottom: 1.8rem;
+      }
+      .pin-container {
+        gap: 0.65rem;
+      }
+      .pin-input {
+        width: 48px;
+        height: 58px;
+        font-size: 1.6rem;
+      }
+      .star-modal-card {
+        padding: 2.2rem 1.6rem;
+      }
+      .modal-icon {
+        font-size: 2.5rem;
+      }
+      .modal-title {
+        font-size: 1.4rem;
+      }
+      .galaxy-title {
+        font-size: 0.95rem;
+        letter-spacing: 4px;
+      }
+      .galaxy-instructions {
+        font-size: 0.72rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       ETAPA 1: PANTALLA DE ACCESO SECRETA
+       ========================================================================== -->
+  <section id="portal-stage" aria-label="Portal de acceso">
+    <canvas id="portal-canvas"></canvas>
+
+    <div class="portal-container">
+      <div class="portal-symbol" aria-hidden="true">✦</div>
+      <h1 class="portal-title">Nuestro Portal Secreto</h1>
+      <p class="portal-subtitle">Un pequeño universo que solamente nosotros conocemos</p>
+
+      <div class="pin-container" role="group" aria-label="Código de acceso de 4 dígitos">
+        <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-input" id="pin-1" aria-label="Dígito 1" autocomplete="off" autofocus />
+        <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-input" id="pin-2" aria-label="Dígito 2" autocomplete="off" />
+        <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-input" id="pin-3" aria-label="Dígito 3" autocomplete="off" />
+        <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-input" id="pin-4" aria-label="Dígito 4" autocomplete="off" />
+      </div>
+
+      <div class="portal-error-msg" id="portal-error" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       ETAPA 2: UNIVERSO / GALAXIA 3D
+       ========================================================================== -->
+  <div id="galaxy-container"></div>
+
+  <div class="galaxy-hud" id="galaxy-hud">
+    <div class="galaxy-title">Nuestro Universo</div>
+    <div class="galaxy-instructions" id="galaxy-hint">Arrastra para explorar · Usa la rueda o pellizca para acercarte · Haz clic en una estrella</div>
+  </div>
+
+  <!-- MODAL DE CONTENIDO DE ESTRELLAS -->
+  <div id="star-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title-elem">
+    <div class="star-modal-card">
+      <button class="modal-close-btn" id="modal-close" aria-label="Cerrar">×</button>
+      <div class="modal-icon" id="modal-icon-elem" aria-hidden="true"></div>
+      <h2 class="modal-title" id="modal-title-elem"></h2>
+      <p class="modal-description" id="modal-desc-elem"></p>
+      <div class="modal-future-slot">[ Rincón preparado para fotografías, cartas y recuerdos futuros ]</div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       LÓGICA JAVASCRIPT
+       ========================================================================== -->
+  <script>
+    /* ==========================================================================
+       CONFIGURACIÓN Y CONSTANTES
+       ========================================================================== */
+    const PASSCODE = "1808";
+    const ERROR_PHRASE = "intenta otra vez mi corderita";
+
+    /* ==========================================================================
+       DATOS DE LAS 7 ESTRELLAS ESPECIALES
+       ========================================================================== */
+    const specialStarsData = [
+      {
+        id: "historia",
+        title: "Nuestra historia",
+        icon: "💌",
+        description: "Aquí podemos guardar nuestra historia: cómo nos conocimos, cómo comenzó todo y cada momento que nos llevó hasta este día.",
+        position: { x: 75, y: 12, z: -60 },
+        color: 0xffe89e,
+        size: 2.8,
+        isCore: false
+      },
+      {
+        id: "recuerdos",
+        title: "Nuestros recuerdos",
+        icon: "📸",
+        description: "Un rincón reservado para nuestras fotografías, pequeños recuerdos, fechas importantes y momentos que jamás queremos olvidar.",
+        position: { x: -85, y: -8, z: 70 },
+        color: 0xffd57a,
+        size: 2.8,
+        isCore: false
+      },
+      {
+        id: "cartas",
+        title: "Cartas",
+        icon: "💖",
+        description: "Este será nuestro rincón para las cartas. Palabras que podamos dejar aquí para encontrarlas nuevamente cuando miremos hacia atrás.",
+        position: { x: 95, y: 20, z: 65 },
+        color: 0xffb7c5,
+        size: 2.8,
+        isCore: false
+      },
+      {
+        id: "cancion",
+        title: "Nuestra canción",
+        icon: "🎵",
+        description: "Aquí podremos colocar nuestra canción, una lista de canciones o un pequeño reproductor personalizado.",
+        position: { x: -90, y: 25, z: -80 },
+        color: 0xa9c6ff,
+        size: 2.8,
+        isCore: false
+      },
+      {
+        id: "futuro",
+        title: "Nuestro futuro",
+        icon: "🌙",
+        description: "Una estrella para todos esos sueños que todavía no hemos cumplido: viajes, proyectos, una casa, una familia y una vida juntos.",
+        position: { x: 30, y: -22, z: 120 },
+        color: 0xffeaa7,
+        size: 2.8,
+        isCore: false
+      },
+      {
+        id: "secreto",
+        title: "Nuestro secreto",
+        icon: "🔐",
+        description: "Este espacio queda reservado para algo que solamente nosotros dos sabemos.",
+        position: { x: -120, y: -18, z: -35 },
+        color: 0xdfb4ff,
+        size: 2.8,
+        isCore: false
+      },
+      {
+        id: "dios",
+        title: "Dios",
+        icon: "✝",
+        description: "El centro de todo. Una estrella dedicada a Dios, quien nos sostiene, nos guía y nos recuerda que nuestro amor debe crecer siempre bajo Su voluntad.",
+        position: { x: 0, y: 5, z: 0 }, // Cerca del centro/núcleo galáctico
+        color: 0xffffff,
+        size: 4.8,
+        isCore: true
+      }
+    ];
+
+    /* ==========================================================================
+       FONDO Y CORAZONES DORADOS DEL PORTAL (CANVAS 2D)
+       ========================================================================== */
+    const portalCanvas = document.getElementById("portal-canvas");
+    const portalCtx = portalCanvas.getContext("2d");
+    let portalAnimationId = null;
+    let hearts = [];
+    let backgroundStars = [];
+
+    function resizePortalCanvas() {
+      if (!portalCanvas) return;
+      portalCanvas.width = window.innerWidth;
+      portalCanvas.height = window.innerHeight;
+      initBackgroundStars();
+    }
+
+    function initBackgroundStars() {
+      backgroundStars = [];
+      const count = Math.floor((window.innerWidth * window.innerHeight) / 4500);
+      for (let i = 0; i < count; i++) {
+        backgroundStars.push({
+          x: Math.random() * portalCanvas.width,
+          y: Math.random() * portalCanvas.height,
+          radius: Math.random() * 1.3 + 0.3,
+          alpha: Math.random() * 0.7 + 0.2,
+          speed: Math.random() * 0.015 + 0.005,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+
+    function createHeart() {
+      return {
+        x: Math.random() * portalCanvas.width,
+        y: -30,
+        size: Math.random() * 12 + 10,
+        speedY: Math.random() * 0.9 + 0.45,
+        speedX: (Math.random() - 0.5) * 0.4,
+        rotation: (Math.random() - 0.5) * 0.5,
+        rotationSpeed: (Math.random() - 0.5) * 0.02,
+        alpha: Math.random() * 0.4 + 0.3,
+        fadeSpeed: Math.random() * 0.002 + 0.001
+      };
+    }
+
+    function initHearts() {
+      hearts = [];
+      const initialCount = 18;
+      for (let i = 0; i < initialCount; i++) {
+        const h = createHeart();
+        h.y = Math.random() * portalCanvas.height;
+        hearts.push(h);
+      }
+    }
+
+    function drawGoldenHeart(ctx, x, y, size, rotation, alpha) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = "#f5d77f";
+      ctx.shadowColor = "rgba(255, 217, 120, 0.4)";
+      ctx.shadowBlur = 8;
+      ctx.font = `${size}px sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("♥", 0, 0);
+      ctx.restore();
+    }
+
+    function animatePortal() {
+      if (!portalCanvas) return;
+      portalCtx.clearRect(0, 0, portalCanvas.width, portalCanvas.height);
+
+      // Dibujar estrellas parpadeantes de fondo
+      for (let star of backgroundStars) {
+        star.phase += star.speed;
+        const currentAlpha = star.alpha + Math.sin(star.phase) * 0.25;
+        portalCtx.fillStyle = `rgba(255, 255, 255, ${Math.max(0.1, Math.min(1, currentAlpha))})`;
+        portalCtx.beginPath();
+        portalCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        portalCtx.fill();
+      }
+
+      // Lluvia de corazones dorados
+      if (hearts.length < 28 && Math.random() < 0.04) {
+        hearts.push(createHeart());
+      }
+
+      for (let i = hearts.length - 1; i >= 0; i--) {
+        const h = hearts[i];
+        h.y += h.speedY;
+        h.x += h.speedX;
+        h.rotation += h.rotationSpeed;
+
+        drawGoldenHeart(portalCtx, h.x, h.y, h.size, h.rotation, h.alpha);
+
+        if (h.y > portalCanvas.height + 40) {
+          hearts.splice(i, 1);
+        }
+      }
+
+      portalAnimationId = requestAnimationFrame(animatePortal);
+    }
+
+    window.addEventListener("resize", resizePortalCanvas);
+    resizePortalCanvas();
+    initHearts();
+    animatePortal();
+
+    /* ==========================================================================
+       GESTIÓN DE CONTRASEÑA Y VALIDACIÓN
+       ========================================================================== */
+    const pinInputs = [
+      document.getElementById("pin-1"),
+      document.getElementById("pin-2"),
+      document.getElementById("pin-3"),
+      document.getElementById("pin-4")
+    ];
+    const portalError = document.getElementById("portal-error");
+    const portalStage = document.getElementById("portal-stage");
+    let isVerifying = false;
+
+    pinInputs.forEach((input, index) => {
+      // Filtrar y auto-avanzar
+      input.addEventListener("input", (e) => {
+        const val = e.target.value.replace(/[^0-9]/g, "");
+        e.target.value = val;
+
+        if (val) {
+          if (index < pinInputs.length - 1) {
+            pinInputs[index + 1].focus();
+          } else {
+            checkPassword();
+          }
+        }
+      });
+
+      // Gestión de Backspace
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && !e.target.value && index > 0) {
+          pinInputs[index - 1].focus();
+        }
+      });
+
+      // Manejo de pegado (Paste)
+      input.addEventListener("paste", (e) => {
+        e.preventDefault();
+        const pastedData = (e.clipboardData || window.clipboardData).getData("text").trim();
+        const digits = pastedData.replace(/[^0-9]/g, "").slice(0, 4);
+        if (digits) {
+          digits.split("").forEach((d, i) => {
+            if (pinInputs[i]) pinInputs[i].value = d;
+          });
+          if (digits.length === 4) {
+            checkPassword();
+          } else if (pinInputs[digits.length]) {
+            pinInputs[digits.length].focus();
+          }
+        }
+      });
+    });
+
+    function checkPassword() {
+      if (isVerifying) return;
+      const enteredCode = pinInputs.map(input => input.value).join("");
+      if (enteredCode.length < 4) return;
+
+      isVerifying = true;
+
+      if (enteredCode === PASSCODE) {
+        handleSuccessPassword();
+      } else {
+        handleFailedPassword();
+      }
+    }
+
+    function handleSuccessPassword() {
+      portalError.classList.remove("visible");
+      pinInputs.forEach(input => {
+        input.classList.add("pin-success");
+        input.disabled = true;
+      });
+
+      // Pequeña pausa cinematográfica previa al portal (1s)
+      setTimeout(() => {
+        startPortalTransition();
+      }, 1000);
+    }
+
+    function handleFailedPassword() {
+      portalError.textContent = ERROR_PHRASE;
+      portalError.classList.add("visible");
+
+      const container = document.querySelector(".pin-container");
+      container.classList.add("pin-shake");
+
+      setTimeout(() => {
+        container.classList.remove("pin-shake");
+        pinInputs.forEach(input => (input.value = ""));
+        pinInputs[0].focus();
+        isVerifying = false;
+      }, 1200);
+    }
+
+    /* ==========================================================================
+       TRANSICIÓN CINEMATOGRÁFICA
+       ========================================================================== */
+    function startPortalTransition() {
+      // 1. Desvanecer la pantalla de acceso con escala y zoom
+      portalStage.classList.add("portal-vanish");
+
+      // 2. Detener la animación 2D tras la transición
+      setTimeout(() => {
+        if (portalAnimationId) cancelAnimationFrame(portalAnimationId);
+      }, 2500);
+
+      // 3. Iniciar e iluminar la Galaxia 3D
+      initGalaxyScene();
+      const galaxyContainer = document.getElementById("galaxy-container");
+      galaxyContainer.classList.add("galaxy-visible");
+
+      // 4. Mostrar HUD sutilmente
+      const hud = document.getElementById("galaxy-hud");
+      setTimeout(() => {
+        hud.classList.add("hud-active");
+      }, 2200);
+
+      // Desvanecer el texto de instrucciones tras 8 segundos
+      setTimeout(() => {
+        const hint = document.getElementById("galaxy-hint");
+        if (hint) hint.classList.add("fade-away");
+      }, 9000);
+    }
+
+    /* ==========================================================================
+       GALAXIA 3D THREE.JS (ESCENA, CÁMARA, RENDERER)
+       ========================================================================== */
+    let scene, camera, renderer;
+    let galaxyPoints, coreLightMesh, specialStarMeshes = [];
+    let raycaster, mouse;
+    let isDragging = false;
+    let previousPointerPosition = { x: 0, y: 0 };
+    let sphericalCoords = { radius: 260, theta: Math.PI / 3, phi: Math.PI / 4 };
+    let targetSphericalCoords = { radius: 220, theta: 0.8, phi: 0.9 };
+    let initialZoomDone = false;
+
+    function initGalaxyScene() {
+      const container = document.getElementById("galaxy-container");
+
+      // Escena y Niebla profunda
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x02040a, 0.0016);
+
+      // Cámara
+      camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2000);
+      updateCameraPosition();
+
+      // Renderer WebGL optimizado
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x02040a, 1);
+      container.appendChild(renderer.domElement);
+
+      // Raycaster para interactividad con estrellas
+      raycaster = new THREE.Raycaster();
+      raycaster.params.Points = { threshold: 3 };
+      mouse = new THREE.Vector2(-9999, -9999);
+
+      // Construcción del Universo
+      buildGalaxyStructure();
+      buildGalaxyCore();
+      buildSpecialStars();
+      setupGalaxyControls();
+
+      // Animación de entrada de cámara (Sensación de escala inmersiva)
+      sphericalCoords.radius = 420;
+      targetSphericalCoords.radius = 210;
+
+      window.addEventListener("resize", onGalaxyWindowResize);
+      renderGalaxyLoop();
+    }
+
+    /* ==========================================================================
+       GENERACIÓN DE BRAZOS ESPIRALES Y PARTÍCULAS
+       ========================================================================== */
+    function buildGalaxyStructure() {
+      const particleCount = 42000;
+      const arms = 5;
+      const galaxyRadius = 150;
+      const spin = 1.1;
+
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      const colors = new Float32Array(particleCount * 3);
+
+      const colorInside = new THREE.Color(0xffe6a3); // Dorado suave brillante
+      const colorMid = new THREE.Color(0xd4af37);    // Dorado real
+      const colorOutside = new THREE.Color(0x3d5a9d); // Azul espacial profundo
+      const colorNebula = new THREE.Color(0x6b4c82);  // Violeta espacial tenue
+
+      for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 3;
+        // Distribución exponencial hacia el centro
+        const r = Math.pow(Math.random(), 2.2) * galaxyRadius;
+        const armAngle = ((i % arms) / arms) * Math.PI * 2;
+        const spinAngle = r * (spin / galaxyRadius) * 4.5;
+
+        // Dispersión tridimensional con mayor altura cerca del centro
+        const randomX = (Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * (galaxyRadius - r)) * 0.18;
+        const randomY = (Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * (galaxyRadius - r)) * 0.12;
+        const randomZ = (Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * (galaxyRadius - r)) * 0.18;
+
+        positions[i3] = Math.cos(armAngle + spinAngle) * r + randomX;
+        positions[i3 + 1] = randomY;
+        positions[i3 + 2] = Math.sin(armAngle + spinAngle) * r + randomZ;
+
+        // Coloración según distancia al núcleo
+        const mixedColor = colorInside.clone();
+        if (r < galaxyRadius * 0.35) {
+          mixedColor.lerp(colorMid, r / (galaxyRadius * 0.35));
+        } else {
+          const t = (r - galaxyRadius * 0.35) / (galaxyRadius * 0.65);
+          mixedColor.copy(colorMid).lerp(Math.random() > 0.3 ? colorOutside : colorNebula, t);
+        }
+
+        colors[i3] = mixedColor.r;
+        colors[i3 + 1] = mixedColor.g;
+        colors[i3 + 2] = mixedColor.b;
+      }
+
+      geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+
+      // Textura circular luminosa para las partículas mediante Canvas
+      const particleTexture = createCircularParticleTexture();
+
+      const material = new THREE.PointsMaterial({
+        size: 1.4,
+        sizeAttenuation: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        vertexColors: true,
+        map: particleTexture,
+        transparent: true,
+        opacity: 0.85
+      });
+
+      galaxyPoints = new THREE.Points(geometry, material);
+      scene.add(galaxyPoints);
+    }
+
+    // Textura procedural suave para partículas
+    function createCircularParticleTexture() {
+      const canvas = document.createElement("canvas");
+      canvas.width = 64;
+      canvas.height = 64;
+      const ctx = canvas.getContext("2d");
+
+      const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+      gradient.addColorStop(0.3, "rgba(255, 225, 150, 0.7)");
+      gradient.addColorStop(0.7, "rgba(100, 140, 255, 0.15)");
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 64, 64);
+
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    /* ==========================================================================
+       NÚCLEO GALÁCTICO CENTRAL
+       ========================================================================== */
+    function buildGalaxyCore() {
+      // Esfera de resplandor central (núcleo dorado)
+      const coreGeo = new THREE.SphereGeometry(6.5, 32, 32);
+      const coreMat = new THREE.MeshBasicMaterial({
+        color: 0xfff4d1,
+        transparent: true,
+        opacity: 0.95
+      });
+      coreLightMesh = new THREE.Mesh(coreGeo, coreMat);
+      scene.add(coreLightMesh);
+
+      // Halo exterior brillante
+      const haloGeo = new THREE.SphereGeometry(14, 32, 32);
+      const haloMat = new THREE.MeshBasicMaterial({
+        color: 0xffd369,
+        transparent: true,
+        opacity: 0.22,
+        blending: THREE.AdditiveBlending,
+        side: THREE.BackSide
+      });
+      const haloMesh = new THREE.Mesh(haloGeo, haloMat);
+      coreLightMesh.add(haloMesh);
+
+      // Luz puntual tenue central
+      const pointLight = new THREE.PointLight(0xffdf80, 2, 300);
+      scene.add(pointLight);
+    }
+
+    /* ==========================================================================
+       ESTRELLAS ESPECIALES INTERACTIVAS
+       ========================================================================== */
+    function buildSpecialStars() {
+      const starTexture = createCircularParticleTexture();
+
+      specialStarsData.forEach((data) => {
+        const starGroup = new THREE.Group();
+        starGroup.position.set(data.position.x, data.position.y, data.position.z);
+
+        // Núcleo visible de la estrella
+        const starMat = new THREE.SpriteMaterial({
+          map: starTexture,
+          color: data.color,
+          blending: THREE.AdditiveBlending,
+          transparent: true,
+          opacity: 0.95
+        });
+        const sprite = new THREE.Sprite(starMat);
+        sprite.scale.set(data.size, data.size, 1);
+        starGroup.add(sprite);
+
+        // Anillo orbital sutil
+        const ringGeo = new THREE.RingGeometry(data.size * 0.9, data.size * 1.15, 32);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: data.color,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.45,
+          blending: THREE.AdditiveBlending
+        });
+        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+        starGroup.add(ringMesh);
+
+        // Si es la estrella de Dios (Centro), añadir un aura especial y mayor brillo
+        if (data.isCore) {
+          const godRingGeo = new THREE.RingGeometry(data.size * 1.5, data.size * 1.7, 40);
+          const godRingMat = new THREE.MeshBasicMaterial({
+            color: 0xfff0b8,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
+          });
+          const godRing = new THREE.Mesh(godRingGeo, godRingMat);
+          godRing.rotation.y = Math.PI / 3;
+          starGroup.add(godRing);
+        }
+
+        // Hitbox invisible para el Raycaster (facilita el clic táctil y con mouse)
+        const hitGeo = new THREE.SphereGeometry(data.size * 1.8, 16, 16);
+        const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+        const hitMesh = new THREE.Mesh(hitGeo, hitMat);
+        hitMesh.userData = { starData: data, groupRef: starGroup };
+        starGroup.add(hitMesh);
+
+        scene.add(starGroup);
+        specialStarMeshes.push(hitMesh);
+      });
+    }
+
+    /* ==========================================================================
+       CONTROLES DE MOUSE, TÁCTIL Y ZOOM
+       ========================================================================== */
+    let touchStartDist = 0;
+
+    function setupGalaxyControls() {
+      const dom = renderer.domElement;
+
+      // Mouse Drag
+      dom.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        previousPointerPosition = { x: e.clientX, y: e.clientY };
+      });
+
+      window.addEventListener("mouseup", () => {
+        isDragging = false;
+      });
+
+      dom.addEventListener("mousemove", (e) => {
+        // Actualizar coordenadas del ratón para raycasting
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+        if (isDragging) {
+          const deltaX = e.clientX - previousPointerPosition.x;
+          const deltaY = e.clientY - previousPointerPosition.y;
+
+          targetSphericalCoords.theta -= deltaX * 0.006;
+          targetSphericalCoords.phi = Math.max(0.12, Math.min(Math.PI - 0.12, targetSphericalCoords.phi + deltaY * 0.006));
+
+          previousPointerPosition = { x: e.clientX, y: e.clientY };
+        }
+      });
+
+      // Rueda de Mouse (Zoom con límites para proteger la vista)
+      dom.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        targetSphericalCoords.radius = Math.max(50, Math.min(380, targetSphericalCoords.radius + e.deltaY * 0.25));
+      }, { passive: false });
+
+      // Click para abrir Modal
+      dom.addEventListener("click", onGalaxyClick);
+
+      // Eventos Táctiles (Móviles y Tablets)
+      dom.addEventListener("touchstart", (e) => {
+        if (e.touches.length === 1) {
+          isDragging = true;
+          previousPointerPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          mouse.x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+          mouse.y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+        } else if (e.touches.length === 2) {
+          isDragging = false;
+          touchStartDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+        }
+      }, { passive: true });
+
+      dom.addEventListener("touchmove", (e) => {
+        if (e.touches.length === 1 && isDragging) {
+          const deltaX = e.touches[0].clientX - previousPointerPosition.x;
+          const deltaY = e.touches[0].clientY - previousPointerPosition.y;
+
+          targetSphericalCoords.theta -= deltaX * 0.007;
+          targetSphericalCoords.phi = Math.max(0.15, Math.min(Math.PI - 0.15, targetSphericalCoords.phi + deltaY * 0.007));
+
+          previousPointerPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        } else if (e.touches.length === 2) {
+          const currentDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          const diff = touchStartDist - currentDist;
+          targetSphericalCoords.radius = Math.max(50, Math.min(380, targetSphericalCoords.radius + diff * 0.45));
+          touchStartDist = currentDist;
+        }
+      }, { passive: true });
+
+      dom.addEventListener("touchend", (e) => {
+        isDragging = false;
+        if (e.changedTouches.length === 1) {
+          // Chequear toque para abrir modal en móvil
+          mouse.x = (e.changedTouches[0].clientX / window.innerWidth) * 2 - 1;
+          mouse.y = -(e.changedTouches[0].clientY / window.innerHeight) * 2 + 1;
+          checkStarIntersection(true);
+        }
+      });
+    }
+
+    function updateCameraPosition() {
+      camera.position.x = sphericalCoords.radius * Math.sin(sphericalCoords.phi) * Math.sin(sphericalCoords.theta);
+      camera.position.y = sphericalCoords.radius * Math.cos(sphericalCoords.phi);
+      camera.position.z = sphericalCoords.radius * Math.sin(sphericalCoords.phi) * Math.cos(sphericalCoords.theta);
+      camera.lookAt(0, 0, 0);
+    }
+
+    function onGalaxyClick() {
+      checkStarIntersection(true);
+    }
+
+    function checkStarIntersection(triggerOpen = false) {
+      if (!raycaster || !camera) return;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(specialStarMeshes, false);
+
+      if (intersects.length > 0) {
+        document.body.style.cursor = "pointer";
+        const selectedStar = intersects[0].object.userData.starData;
+
+        if (triggerOpen && selectedStar) {
+          openStarModal(selectedStar);
+        }
+      } else {
+        document.body.style.cursor = "default";
+      }
+    }
+
+    /* ==========================================================================
+       CICLO DE RENDERIZADO Y ANIMACIÓN
+       ========================================================================== */
+    let clock = new THREE.Clock();
+
+    function renderGalaxyLoop() {
+      requestAnimationFrame(renderGalaxyLoop);
+
+      const elapsedTime = clock.getElapsedTime();
+
+      // Rotación automática sutil y continua de la galaxia
+      if (galaxyPoints) {
+        galaxyPoints.rotation.y = elapsedTime * 0.035;
+      }
+
+      // Suavizado e interpolación de la cámara
+      sphericalCoords.radius += (targetSphericalCoords.radius - sphericalCoords.radius) * 0.045;
+      sphericalCoords.theta += (targetSphericalCoords.theta - sphericalCoords.theta) * 0.06;
+      sphericalCoords.phi += (targetSphericalCoords.phi - sphericalCoords.phi) * 0.06;
+      updateCameraPosition();
+
+      // Pulsación del núcleo central
+      if (coreLightMesh) {
+        const pulse = 1 + Math.sin(elapsedTime * 2) * 0.06;
+        coreLightMesh.scale.set(pulse, pulse, pulse);
+      }
+
+      // Pulsación y balanceo de estrellas especiales
+      specialStarMeshes.forEach((hitMesh) => {
+        const group = hitMesh.userData.groupRef;
+        if (group) {
+          const starPulse = 1 + Math.sin(elapsedTime * 3 + hitMesh.id) * 0.12;
+          group.children[0].scale.set(
+            hitMesh.userData.starData.size * starPulse,
+            hitMesh.userData.starData.size * starPulse,
+            1
+          );
+          if (group.children[1]) {
+            group.children[1].rotation.z = elapsedTime * 0.4;
+          }
+        }
+      });
+
+      // Hover interactivo continuo
+      checkStarIntersection(false);
+
+      renderer.render(scene, camera);
+    }
+
+    function onGalaxyWindowResize() {
+      if (!camera || !renderer) return;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    /* ==========================================================================
+       GESTIÓN DE VENTANAS / MODALES
+       ========================================================================== */
+    const modalBackdrop = document.getElementById("star-modal-backdrop");
+    const modalCloseBtn = document.getElementById("modal-close");
+    const modalIconElem = document.getElementById("modal-icon-elem");
+    const modalTitleElem = document.getElementById("modal-title-elem");
+    const modalDescElem = document.getElementById("modal-desc-elem");
+
+    function openStarModal(star) {
+      modalIconElem.textContent = star.icon;
+      modalTitleElem.textContent = star.title;
+      modalDescElem.textContent = star.description;
+
+      modalBackdrop.classList.add("modal-open");
+    }
+
+    function closeStarModal() {
+      modalBackdrop.classList.remove("modal-open");
+    }
+
+    modalCloseBtn.addEventListener("click", closeStarModal);
+
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) {
+        closeStarModal();
+      }
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modalBackdrop.classList.contains("modal-open")) {
+        closeStarModal();
+      }
+    });
+  </script>
+</body>
+</html>
