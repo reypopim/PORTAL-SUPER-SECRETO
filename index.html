@@ -651,76 +651,130 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Reproductor de Nuestra Canción */
+    /* ==========================================================================
+       REPRODUCTOR DE MÚSICA — NUESTRA CANCIÓN
+       ========================================================================== */
     .music-box {
-      max-width: 620px;
+      max-width: 580px;
       margin: 0 auto;
       background: rgba(8, 18, 44, 0.65);
       border: 1px solid rgba(230, 198, 112, 0.28);
       border-radius: 20px;
-      padding: 2.5rem 2rem;
+      padding: 2.4rem 2rem;
       text-align: center;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(230, 198, 112, 0.08);
     }
-    .music-cover {
-      width: 190px;
-      height: 190px;
+
+    .music-cover-wrapper {
+      position: relative;
+      width: 220px;
+      height: 220px;
       margin: 0 auto 1.8rem;
       border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(230, 198, 112, 0.32);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.75), 0 0 20px rgba(230, 198, 112, 0.12);
+      transition: box-shadow 0.6s ease, transform 0.6s ease;
       background: radial-gradient(circle at 50% 50%, rgba(20, 38, 85, 0.9), rgba(5, 10, 26, 0.95));
-      border: 1px solid rgba(230, 198, 112, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Pulso sutil y elegante al reproducir */
+    .music-cover-wrapper.is-playing {
+      animation: coverBreathing 4s ease-in-out infinite;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.85), 0 0 30px rgba(255, 217, 120, 0.35);
+      border-color: rgba(255, 217, 120, 0.6);
+    }
+
+    @keyframes coverBreathing {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.025); filter: brightness(1.08); }
+    }
+
+    .music-cover-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .music-cover-placeholder {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 3rem;
+      width: 100%;
+      height: 100%;
       color: var(--gold-bright);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      font-size: 2.8rem;
     }
+
     .track-title {
       font-family: var(--font-serif);
       font-size: 1.45rem;
+      letter-spacing: 1.5px;
       color: #fff;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.35rem;
     }
+
     .track-artist {
-      font-size: 0.95rem;
-      color: rgba(245, 246, 250, 0.6);
+      font-size: 0.9rem;
+      color: rgba(245, 246, 250, 0.65);
       font-weight: 300;
       letter-spacing: 1px;
-      margin-bottom: 2rem;
+      margin-bottom: 1.8rem;
+      min-height: 1.2rem;
     }
+
+    /* Barra de progreso interactiva */
     .player-progress-bar {
       width: 100%;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      margin-bottom: 0.8rem;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      margin-bottom: 0.7rem;
       position: relative;
+      cursor: pointer;
       overflow: hidden;
+      transition: height 0.2s ease;
     }
+
+    .player-progress-bar:hover {
+      height: 8px;
+    }
+
     .player-progress-fill {
-      width: 38%;
+      width: 0%;
       height: 100%;
       background: linear-gradient(90deg, var(--gold-primary), var(--gold-bright));
-      border-radius: 4px;
+      border-radius: 6px;
       box-shadow: 0 0 10px var(--gold-glow);
+      pointer-events: none;
+      transition: width 0.1s linear;
     }
+
     .player-times {
       display: flex;
       justify-content: space-between;
       font-size: 0.78rem;
-      color: rgba(245, 246, 250, 0.5);
-      margin-bottom: 1.6rem;
+      color: rgba(245, 246, 250, 0.55);
+      margin-bottom: 1.4rem;
+      font-variant-numeric: tabular-nums;
     }
+
     .player-controls {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 1.8rem;
+      gap: 1.5rem;
+      margin-bottom: 1.4rem;
     }
+
     .player-btn {
       background: transparent;
-      border: 1px solid rgba(230, 198, 112, 0.3);
+      border: 1px solid rgba(230, 198, 112, 0.35);
       color: var(--gold-bright);
       width: 44px;
       height: 44px;
@@ -732,6 +786,7 @@
       cursor: pointer;
       transition: all 0.25s ease;
     }
+
     .player-btn.play-main {
       width: 58px;
       height: 58px;
@@ -740,9 +795,65 @@
       border-color: var(--gold-bright);
       box-shadow: 0 0 18px rgba(255, 217, 120, 0.25);
     }
+
     .player-btn:hover {
       transform: scale(1.08);
       background: rgba(230, 198, 112, 0.22);
+      border-color: var(--gold-bright);
+    }
+
+    /* Control de volumen sutil */
+    .player-volume-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: rgba(230, 198, 112, 0.8);
+    }
+
+    .volume-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--gold-bright);
+      box-shadow: 0 0 8px var(--gold-glow);
+      cursor: pointer;
+    }
+
+    .volume-slider::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--gold-bright);
+      box-shadow: 0 0 8px var(--gold-glow);
+      border: none;
+      cursor: pointer;
+    }
+
+    .music-message-box {
+      margin-top: 2.2rem;
+      padding-top: 1.4rem;
+      border-top: 1px dashed rgba(230, 198, 112, 0.2);
+      font-style: italic;
+      font-size: 0.95rem;
+      color: rgba(245, 246, 250, 0.85);
+      line-height: 1.7;
+      letter-spacing: 0.5px;
     }
 
     /* Tarjetas de Nuestro Futuro */
@@ -904,6 +1015,16 @@
       .memories-grid {
         grid-template-columns: 1fr;
       }
+      .music-box {
+        padding: 1.8rem 1.2rem;
+      }
+      .music-cover-wrapper {
+        width: 175px;
+        height: 175px;
+      }
+      .track-title {
+        font-size: 1.25rem;
+      }
     }
   </style>
 </head>
@@ -933,7 +1054,8 @@
 
   <!-- ==========================================================================
        ETAPA 2: UNIVERSO / GALAXIA 3D
-       ========================================================================== -->
+       ========================================================================== */
+  -->
   <div id="galaxy-container"></div>
 
   <div class="galaxy-hud" id="galaxy-hud">
@@ -946,7 +1068,6 @@
        ========================================================================== -->
   <div class="universe-overlay" id="universe-overlay" aria-hidden="true">
     <div class="mini-page" id="mini-page-panel" role="dialog" aria-modal="true">
-      <!-- Barra Superior Fija -->
       <div class="mini-page-header">
         <button class="back-btn" id="world-back-btn" aria-label="Volver al universo">
           ← Volver al universo
@@ -954,12 +1075,14 @@
         <div class="header-subtle-hint" id="header-hint">Universo Privado</div>
       </div>
 
-      <!-- Contenedor con Scroll Aislado e Ilimitado -->
       <div class="mini-page-content" id="mini-page-scroll-area">
-        <!-- Contenido inyectado dinámicamente según la estrella -->
+        <!-- Contenido inyectado dinámicamente -->
       </div>
     </div>
   </div>
+
+  <!-- Elemento de Audio HTML5 persistente para reproducción inmersiva -->
+  <audio id="global-music-player" preload="metadata"></audio>
 
   <!-- ==========================================================================
        LÓGICA JAVASCRIPT
@@ -972,7 +1095,18 @@
     const ERROR_PHRASE = "intenta otra vez mi corderita";
 
     /* ==========================================================================
-       ARQUITECTURA DE MUNDOS (CONTENIDO EDITABLE DE CADA ESTRELLA)
+       CONFIGURACIÓN EDITABLE: NUESTRA CANCIÓN
+       ========================================================================== */
+    const musicWorld = {
+      title: "Passacaglia Piano Variations",
+      artist: "", // Déjalo vacío o añade el intérprete cuando lo definas
+      audio: "/assets/music/Passacaglia Variations - HandelHalvorsen (Relaxing Piano Music).mp3",
+      cover: "/assets/music/FOTO.jpg",
+      message: "Una canción guardada en nuestro pequeño universo."
+    };
+
+    /* ==========================================================================
+       ARQUITECTURA DE MUNDOS
        ========================================================================== */
     const worlds = {
       historia: {
@@ -1135,32 +1269,53 @@
         id: "musica",
         title: "Nuestra canción",
         icon: "🎵",
-        quote: "“Aquí podremos colocar nuestra canción, una lista de canciones o un pequeño reproductor personalizado.”",
+        quote: "“Una pieza especial guardada en lo más profundo de nuestro universo compartido.”",
         render: function() {
+          const artistHTML = musicWorld.artist ? `<p class="track-artist">${musicWorld.artist}</p>` : `<p class="track-artist" style="margin-bottom: 1.4rem;"></p>`;
           return `
             <div class="music-box">
-              <div class="music-cover">
-                <span>𝄞</span>
+              <div class="music-cover-wrapper" id="music-cover-box">
+                <img src="${musicWorld.cover}" 
+                     alt="Portada de ${musicWorld.title}" 
+                     class="music-cover-img"
+                     onerror="this.style.display='none'; document.getElementById('music-fallback-icon').style.display='flex';" />
+                <div class="music-cover-placeholder" id="music-fallback-icon" style="display:none;">
+                  <span>𝄞</span>
+                </div>
               </div>
-              <h3 class="track-title">Nuestra Melodía</h3>
-              <p class="track-artist">La banda sonora de nuestra historia</p>
 
-              <div class="player-progress-bar">
-                <div class="player-progress-fill"></div>
+              <h3 class="track-title">${musicWorld.title}</h3>
+              ${artistHTML}
+
+              <!-- Barra interactiva de progreso -->
+              <div class="player-progress-bar" id="music-progress-bar" title="Avanzar / Retroceder">
+                <div class="player-progress-fill" id="music-progress-fill"></div>
               </div>
+
               <div class="player-times">
-                <span>01:18</span>
-                <span>03:45</span>
+                <span id="music-current-time">00:00</span>
+                <span id="music-duration-time">--:--</span>
               </div>
 
+              <!-- Controles de Reproducción -->
               <div class="player-controls">
-                <button class="player-btn" aria-label="Anterior">⏮</button>
-                <button class="player-btn play-main" aria-label="Reproducir">▶</button>
-                <button class="player-btn" aria-label="Siguiente">⏭</button>
+                <button class="player-btn" id="btn-backward-10" aria-label="Retroceder 10 segundos" title="-10s">↺</button>
+                <button class="player-btn play-main" id="btn-toggle-play" aria-label="Reproducir o pausar">
+                  <span id="play-icon-symbol">▶</span>
+                </button>
+                <button class="player-btn" id="btn-forward-10" aria-label="Adelantar 10 segundos" title="+10s">↻</button>
               </div>
 
-              <div style="margin-top:2rem; font-style:italic; font-size:0.9rem; color:rgba(245,246,250,0.7); line-height:1.7;">
-                [ Rincón preparado para enlazar un archivo de audio o tu playlist favorita ]
+              <!-- Control de volumen -->
+              <div class="player-volume-wrapper">
+                <span>🔈</span>
+                <input type="range" class="volume-slider" id="music-volume-slider" min="0" max="1" step="0.05" value="0.85" aria-label="Control de volumen" />
+                <span>🔊</span>
+              </div>
+
+              <!-- Mensaje Romántico Personal -->
+              <div class="music-message-box">
+                ${musicWorld.message}
               </div>
             </div>
           `;
@@ -1494,7 +1649,7 @@
     let previousPointerPosition = { x: 0, y: 0 };
     let sphericalCoords = { radius: 260, theta: Math.PI / 3, phi: Math.PI / 4 };
     let targetSphericalCoords = { radius: 210, theta: 0.8, phi: 0.9 };
-    let activeWorld = null; // Control del mundo actualmente abierto
+    let activeWorld = null;
 
     function initGalaxyScene() {
       const container = document.getElementById("galaxy-container");
@@ -1697,7 +1852,7 @@
     }
 
     /* ==========================================================================
-       CONTROLES DE MOUSE, TÁCTIL Y ZOOM (AISLADOS DE LA MINI-PÁGINA)
+       CONTROLES DE MOUSE, TÁCTIL Y ZOOM
        ========================================================================== */
     let touchStartDist = 0;
 
@@ -1705,7 +1860,7 @@
       const dom = renderer.domElement;
 
       dom.addEventListener("mousedown", (e) => {
-        if (activeWorld) return; // Evitar arrastrar si hay mini-página abierta
+        if (activeWorld) return;
         isDragging = true;
         previousPointerPosition = { x: e.clientX, y: e.clientY };
       });
@@ -1731,7 +1886,7 @@
       });
 
       dom.addEventListener("wheel", (e) => {
-        if (activeWorld) return; // El scroll no afecta a la galaxia si hay mundo activo
+        if (activeWorld) return;
         e.preventDefault();
         targetSphericalCoords.radius = Math.max(50, Math.min(380, targetSphericalCoords.radius + e.deltaY * 0.25));
       }, { passive: false });
@@ -1740,7 +1895,6 @@
         if (!activeWorld) checkStarIntersection(true);
       });
 
-      // Táctil (Móvil)
       dom.addEventListener("touchstart", (e) => {
         if (activeWorld) return;
         if (e.touches.length === 1) {
@@ -1815,7 +1969,7 @@
     }
 
     /* ==========================================================================
-       CICLO DE RENDERIZADO CONTINUO (LA GALAXIA NUNCA MUERE)
+       CICLO DE RENDERIZADO CONTINUO
        ========================================================================== */
     let clock = new THREE.Clock();
 
@@ -1824,24 +1978,20 @@
 
       const elapsedTime = clock.getElapsedTime();
 
-      // Rotación suave permanente, incluso detrás de una mini-página
       if (galaxyPoints) {
         galaxyPoints.rotation.y = elapsedTime * 0.035;
       }
 
-      // Suavizado e interpolación de la cámara
       sphericalCoords.radius += (targetSphericalCoords.radius - sphericalCoords.radius) * 0.045;
       sphericalCoords.theta += (targetSphericalCoords.theta - sphericalCoords.theta) * 0.06;
       sphericalCoords.phi += (targetSphericalCoords.phi - sphericalCoords.phi) * 0.06;
       updateCameraPosition();
 
-      // Pulsación del núcleo central
       if (coreLightMesh) {
         const pulse = 1 + Math.sin(elapsedTime * 2) * 0.06;
         coreLightMesh.scale.set(pulse, pulse, pulse);
       }
 
-      // Animación de estrellas especiales
       specialStarMeshes.forEach((hitMesh) => {
         const group = hitMesh.userData.groupRef;
         if (group) {
@@ -1857,7 +2007,6 @@
         }
       });
 
-      // Si no hay mini-página abierta, chequear hover
       if (!activeWorld) {
         checkStarIntersection(false);
       }
@@ -1879,9 +2028,9 @@
     const miniPageScrollArea = document.getElementById("mini-page-scroll-area");
     const worldBackBtn = document.getElementById("world-back-btn");
     const headerHint = document.getElementById("header-hint");
+    const globalAudio = document.getElementById("global-music-player");
     let savedCameraRadius = null;
 
-    // Normalizar ID de estrella a clave de worlds
     function normalizeStarKey(id) {
       if (id === "cancion") return "musica";
       return id;
@@ -1895,11 +2044,9 @@
       activeWorld = worldKey;
       document.body.style.cursor = "default";
 
-      // 1. Efecto cinematográfico de acercamiento hacia la estrella (0.6s)
       savedCameraRadius = targetSphericalCoords.radius;
       targetSphericalCoords.radius = Math.max(70, targetSphericalCoords.radius * 0.85);
 
-      // Efecto de brillo ampliado momentáneo en la estrella elegida
       if (hitMesh && hitMesh.userData.groupRef) {
         const sprite = hitMesh.userData.groupRef.children[0];
         if (sprite) {
@@ -1907,7 +2054,6 @@
         }
       }
 
-      // 2. Construir el contenido completo e independiente del mundo
       headerHint.textContent = `Mundo · ${worldInfo.title}`;
 
       const fullHTML = `
@@ -1921,9 +2067,13 @@
       `;
 
       miniPageScrollArea.innerHTML = fullHTML;
-      miniPageScrollArea.scrollTop = 0; // Reiniciar scroll al tope
+      miniPageScrollArea.scrollTop = 0;
 
-      // 3. Revelar el panel inmersivo
+      // Si se abre "Nuestra canción", enlazar interactividad del reproductor
+      if (worldKey === "musica") {
+        setupMusicPlayerInteraction();
+      }
+
       setTimeout(() => {
         universeOverlay.classList.add("world-active");
         universeOverlay.setAttribute("aria-hidden", "false");
@@ -1933,27 +2083,22 @@
     function closeWorld() {
       if (!activeWorld) return;
 
-      // 1. Suave animación de salida
       universeOverlay.classList.remove("world-active");
       universeOverlay.setAttribute("aria-hidden", "true");
 
-      // 2. Restaurar la distancia de cámara de forma natural
       if (savedCameraRadius !== null) {
         targetSphericalCoords.radius = savedCameraRadius;
       }
 
-      // 3. Devolver el control a la galaxia tras terminar la transición CSS
       setTimeout(() => {
         activeWorld = null;
         miniPageScrollArea.innerHTML = "";
       }, 700);
     }
 
-    // Eventos de Cierre
     worldBackBtn.addEventListener("click", closeWorld);
 
     universeOverlay.addEventListener("click", (e) => {
-      // Cerrar al hacer clic en el fondo exterior a la mini-página
       if (e.target === universeOverlay) {
         closeWorld();
       }
@@ -1965,7 +2110,6 @@
       }
     });
 
-    // Aislamiento completo de scroll para dispositivos táctiles y mouse wheel
     const miniPagePanel = document.getElementById("mini-page-panel");
     miniPagePanel.addEventListener("wheel", (e) => {
       e.stopPropagation();
@@ -1974,6 +2118,118 @@
     miniPagePanel.addEventListener("touchmove", (e) => {
       e.stopPropagation();
     }, { passive: true });
+
+    /* ==========================================================================
+       CONTROL DEL REPRODUCTOR DE AUDIO (PASSACAGLIA VARIATIONS)
+       ========================================================================== */
+    function formatTime(seconds) {
+      if (isNaN(seconds) || seconds < 0) return "00:00";
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function setupMusicPlayerInteraction() {
+      const coverBox = document.getElementById("music-cover-box");
+      const btnTogglePlay = document.getElementById("btn-toggle-play");
+      const playIconSymbol = document.getElementById("play-icon-symbol");
+      const btnBackward = document.getElementById("btn-backward-10");
+      const btnForward = document.getElementById("btn-forward-10");
+      const progressBar = document.getElementById("music-progress-bar");
+      const progressFill = document.getElementById("music-progress-fill");
+      const currentTimeElem = document.getElementById("music-current-time");
+      const durationTimeElem = document.getElementById("music-duration-time");
+      const volumeSlider = document.getElementById("music-volume-slider");
+
+      // Si la fuente de audio no ha sido asignada, asignarla
+      if (!globalAudio.src || !globalAudio.src.includes(encodeURI(musicWorld.audio))) {
+        globalAudio.src = musicWorld.audio;
+      }
+
+      // Sincronizar estado visual
+      function updatePlayButtonUI() {
+        if (!globalAudio.paused) {
+          playIconSymbol.textContent = "⏸";
+          if (coverBox) coverBox.classList.add("is-playing");
+        } else {
+          playIconSymbol.textContent = "▶";
+          if (coverBox) coverBox.classList.remove("is-playing");
+        }
+      }
+
+      updatePlayButtonUI();
+
+      if (globalAudio.duration) {
+        durationTimeElem.textContent = formatTime(globalAudio.duration);
+        currentTimeElem.textContent = formatTime(globalAudio.currentTime);
+        const percent = (globalAudio.currentTime / globalAudio.duration) * 100;
+        progressFill.style.width = `${percent}%`;
+      }
+
+      // Evento Play / Pause
+      btnTogglePlay.onclick = () => {
+        if (globalAudio.paused) {
+          globalAudio.play().then(() => {
+            updatePlayButtonUI();
+          }).catch(err => {
+            console.log("Esperando archivo de audio local o interacción:", err);
+          });
+        } else {
+          globalAudio.pause();
+          updatePlayButtonUI();
+        }
+      };
+
+      // Retroceder / Adelantar 10s
+      btnBackward.onclick = () => {
+        globalAudio.currentTime = Math.max(0, globalAudio.currentTime - 10);
+      };
+
+      btnForward.onclick = () => {
+        if (globalAudio.duration) {
+          globalAudio.currentTime = Math.min(globalAudio.duration, globalAudio.currentTime + 10);
+        }
+      };
+
+      // Control de volumen
+      volumeSlider.value = globalAudio.volume;
+      volumeSlider.oninput = (e) => {
+        globalAudio.volume = parseFloat(e.target.value);
+      };
+
+      // Clic en la barra de progreso para saltar en la canción
+      progressBar.onclick = (e) => {
+        if (!globalAudio.duration) return;
+        const rect = progressBar.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const newFraction = Math.max(0, Math.min(1, clickX / rect.width));
+        globalAudio.currentTime = newFraction * globalAudio.duration;
+      };
+
+      // Actualización de tiempos y barra de progreso durante la reproducción
+      globalAudio.ontimeupdate = () => {
+        if (!activeWorld || activeWorld !== "musica") return;
+        if (globalAudio.duration) {
+          const percent = (globalAudio.currentTime / globalAudio.duration) * 100;
+          progressFill.style.width = `${percent}%`;
+          currentTimeElem.textContent = formatTime(globalAudio.currentTime);
+          durationTimeElem.textContent = formatTime(globalAudio.duration);
+        } else {
+          currentTimeElem.textContent = formatTime(globalAudio.currentTime);
+        }
+      };
+
+      globalAudio.onloadedmetadata = () => {
+        if (durationTimeElem) {
+          durationTimeElem.textContent = formatTime(globalAudio.duration);
+        }
+      };
+
+      globalAudio.onended = () => {
+        updatePlayButtonUI();
+        progressFill.style.width = "0%";
+      };
+    }
   </script>
 </body>
 </html>
